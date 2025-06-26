@@ -2,6 +2,8 @@
 
 A simple single-player Pong game built in Python using Pygame.
 
+![Screenshot](Screenshot%202025-06-26%20212716.png)
+
 ## Requirements
 
 - Python 3.9 or later
