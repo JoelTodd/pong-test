@@ -7,12 +7,12 @@ WIDTH, HEIGHT = 512, 640
 FPS = 60
 PADDLE_WIDTH, PADDLE_HEIGHT = 80, 10
 BALL_SIZE = 12
-PADDLE_SPEED = 7
+PADDLE_SPEED = 8
 BALL_SPEED_X_RANGE = (-4, 4)       # choose x speed randomly in this range
 BALL_SPEED_Y_RANGE = (4, 6)        # choose y speed randomly in this range
-SPEED_INCREMENT = 1.05             # 5% speed increase on every paddle hit
+SPEED_INCREMENT = 1.08             # 5% speed increase on every paddle hit
 MAX_BALL_SPEED = 50                # cap the speed so the game stays playable
-TRANSITION_RATE = 10               # higher is snappier paddle acceleration
+TRANSITION_RATE = 12               # higher is snappier paddle acceleration
 
 
 def cubic_bezier(t, p0, p1, p2, p3):
