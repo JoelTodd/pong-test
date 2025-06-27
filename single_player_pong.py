@@ -77,7 +77,6 @@ while True:
     screen.fill("black")
     pygame.draw.rect(screen, "white", paddle)
     pygame.draw.ellipse(screen, "white", ball)
-    pygame.draw.line(screen, "white", (WIDTH // 2, 0), (WIDTH // 2, HEIGHT), 1)
 
     score_surf = font.render(f"Score: {score}", True, "white")
     screen.blit(score_surf, (WIDTH - score_surf.get_width() - 10, 10))
