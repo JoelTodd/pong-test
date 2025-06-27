@@ -10,6 +10,8 @@ BALL_SIZE = 12
 PADDLE_SPEED = 6
 BALL_SPEED_X_RANGE = (4, 6)        # choose x speed randomly in this range
 BALL_SPEED_Y_RANGE = (-4, 4)       # choose y speed randomly in this range
+SPEED_INCREMENT = 1.05             # 5% speed increase on every paddle hit
+MAX_BALL_SPEED = 10                # cap the speed so the game stays playable
 
 # --- init
 pygame.init()
@@ -62,6 +64,8 @@ while True:
     # bounce off paddle
     if ball.colliderect(paddle) and ball_vx < 0:
         ball_vx *= -1
+        ball_vx = max(min(ball_vx * SPEED_INCREMENT, MAX_BALL_SPEED), -MAX_BALL_SPEED)
+        ball_vy = max(min(ball_vy * SPEED_INCREMENT, MAX_BALL_SPEED), -MAX_BALL_SPEED)
         score += 1
 
     # ball missed
