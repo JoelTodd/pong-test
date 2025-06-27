@@ -6,7 +6,7 @@ import math
 # --- game constants
 WIDTH, HEIGHT = 512, 640
 FPS = 60
-PADDLE_WIDTH, PADDLE_HEIGHT = 80, 10
+PADDLE_WIDTH, PADDLE_HEIGHT = 90, 8
 BALL_SIZE = 12
 PADDLE_SPEED = 8
 BALL_SPEED_X_RANGE = (-4, 4)       # choose x speed randomly in this range
@@ -14,7 +14,7 @@ BALL_SPEED_Y_RANGE = (4, 6)        # choose y speed randomly in this range
 SPEED_INCREMENT = 1.08             # 5% speed increase on every paddle hit
 MAX_BALL_SPEED = 50                # cap the speed so the game stays playable
 TRANSITION_RATE = 12               # higher is snappier paddle acceleration
-POWERUP_WIDTH, POWERUP_HEIGHT = 60, 10
+POWERUP_WIDTH, POWERUP_HEIGHT = 80, 4
 POWERUP_DURATION = 8.0
 POWERUP_CHANCE = 0.005            # chance each frame that a powerup appears
 
