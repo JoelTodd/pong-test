@@ -23,6 +23,6 @@ The ball speeds up slightly with each successful paddle hit, making the
 game progressively more challenging. Keep an eye out for the yellow powerup
 that appears as a short, unmoving paddle. It sticks around for a few seconds
 and duplicates any ball that passes through it, launching the new copy in a
-random direction that keeps the same vertical motion as the source ball while
-never travelling perfectly sideways. The game only resets when every ball has
-been missed.
+random direction that keeps the same vertical motion and overall speed as the
+source ball while never travelling perfectly sideways. The game only resets
+when every ball has been missed.

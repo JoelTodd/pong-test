@@ -1,6 +1,7 @@
 import pygame
 import sys
 import random
+import math
 
 # --- game constants
 WIDTH, HEIGHT = 512, 640
@@ -47,16 +48,21 @@ def random_velocity(up: bool = False) -> tuple[int, int]:
     return vx, vy
 
 
-def duplicate_velocity(vy_current: int) -> tuple[int, int]:
-    """Return a new velocity keeping the same vertical direction as ``vy_current``.
+def duplicate_velocity(vx_current: int, vy_current: int) -> tuple[int, int]:
+    """Return a new velocity with the same speed as ``(vx_current, vy_current)``.
 
-    The duplicated ball will never move directly sideways."""
-    vx_candidates = [v for v in range(*BALL_SPEED_X_RANGE) if v != 0]
-    vx = random.choice(vx_candidates)
-    vy = random.choice(range(*BALL_SPEED_Y_RANGE))
-    if vy_current < 0:
-        vy *= -1
-    return vx, vy
+    The new direction is randomised while keeping the original vertical
+    orientation and never pointing perfectly sideways."""
+    speed = (vx_current ** 2 + vy_current ** 2) ** 0.5
+    while True:
+        angle = random.uniform(0.1, 3.04)  # avoid 0 or PI radians
+        vx = speed * math.cos(angle)
+        if abs(vx) < 1e-3:
+            continue  # skip directions that are effectively sideways
+        vy = speed * math.sin(angle)
+        if vy_current < 0:
+            vy *= -1
+        return int(round(vx)), int(round(vy))
 
 
 next_ball_id = 0
@@ -159,7 +165,7 @@ while True:
                 if ball_id in powerup["collided"]:
                     continue
                 if rect.colliderect(b["rect"]):
-                    vx, vy = duplicate_velocity(b["vy"])
+                    vx, vy = duplicate_velocity(b["vx"], b["vy"])
                     nb = create_ball(up=b["vy"] < 0, pos=b["rect"].center)
                     nb["vx"], nb["vy"] = vx, vy
                     powerup["collided"].update({ball_id, nb["id"]})
