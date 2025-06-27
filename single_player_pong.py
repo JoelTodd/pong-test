@@ -136,134 +136,191 @@ def run_menu() -> None:
         pygame.display.flip()
         clock.tick(FPS)
 
-# --- init
-pygame.init()
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Single-Player Pong")
-clock = pygame.time.Clock()
-font = pygame.font.SysFont(None, 32)
 
-run_menu()
+def run_game_over(score: int) -> str:
+    """Display a basic game over screen and return the user's choice."""
+    options = ["Retry", "Main Menu"]
+    selected = 0
+    title_font = pygame.font.SysFont(None, 48)
+    menu_font = pygame.font.SysFont(None, 32)
 
-# --- game objects
-paddle = pygame.Rect(
-    WIDTH // 2 - PADDLE_WIDTH // 2,
-    HEIGHT - 20 - PADDLE_HEIGHT,
-    PADDLE_WIDTH,
-    PADDLE_HEIGHT,
-)
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key in (pygame.K_UP, pygame.K_w):
+                    selected = (selected - 1) % len(options)
+                elif event.key in (pygame.K_DOWN, pygame.K_s):
+                    selected = (selected + 1) % len(options)
+                elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
+                    return "retry" if selected == 0 else "menu"
 
-balls = [create_ball()]
-powerup = None
-score = 0
+        screen.fill("black")
 
-# paddle movement smoothing
-paddle_vx = 0
-paddle_target_vx = 0
-paddle_start_vx = 0
-transition_t = 1.0
+        title_surf = title_font.render("Game Over", True, "white")
+        screen.blit(
+            title_surf,
+            (WIDTH // 2 - title_surf.get_width() // 2, HEIGHT // 3 - 50),
+        )
 
-# --- main loop
-while True:
-    dt = clock.tick(FPS) / 1000.0
+        score_surf = menu_font.render(f"Score: {score}", True, "white")
+        screen.blit(
+            score_surf,
+            (WIDTH // 2 - score_surf.get_width() // 2, HEIGHT // 2 - 40),
+        )
 
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
+        for i, option in enumerate(options):
+            color = "yellow" if i == selected else "white"
+            surf = menu_font.render(option, True, color)
+            screen.blit(
+                surf,
+                (WIDTH // 2 - surf.get_width() // 2, HEIGHT // 2 + i * 40),
+            )
 
-    # input
-    keys = pygame.key.get_pressed()
-    new_target_vx = 0
-    if keys[pygame.K_LEFT] and paddle.left > 0:
-        new_target_vx = -PADDLE_SPEED
-    elif keys[pygame.K_RIGHT] and paddle.right < WIDTH:
-        new_target_vx = PADDLE_SPEED
+        pygame.display.flip()
+        clock.tick(FPS)
 
-    if new_target_vx != paddle_target_vx:
-        paddle_target_vx = new_target_vx
-        paddle_start_vx = paddle_vx
-        transition_t = 0.0
+# --- init block removed; initialization happens in main()
 
-    if transition_t < 1.0:
-        transition_t = min(transition_t + TRANSITION_RATE * dt, 1.0)
-        prog = snappy_ease(transition_t)
-        paddle_vx = paddle_start_vx + (paddle_target_vx - paddle_start_vx) * prog
-    else:
-        paddle_vx = paddle_target_vx
+def run_game() -> int:
+    """Run the main game loop and return the final score when finished."""
+    paddle = pygame.Rect(
+        WIDTH // 2 - PADDLE_WIDTH // 2,
+        HEIGHT - 20 - PADDLE_HEIGHT,
+        PADDLE_WIDTH,
+        PADDLE_HEIGHT,
+    )
 
-    paddle.x += paddle_vx
-    if paddle.left < 0:
-        paddle.left = 0
-    if paddle.right > WIDTH:
-        paddle.right = WIDTH
+    balls = [create_ball()]
+    powerup = None
+    score = 0
 
-    # spawn powerup
-    if powerup is None and random.random() < POWERUP_CHANCE:
-        powerup = spawn_powerup()
+    paddle_vx = 0
+    paddle_target_vx = 0
+    paddle_start_vx = 0
+    transition_t = 1.0
 
-    # update powerup timer
-    if powerup is not None:
-        powerup["timer"] -= dt
-        if powerup["timer"] <= 0:
-            powerup = None
+    while True:
+        dt = clock.tick(FPS) / 1000.0
 
-    # update balls
-    for b in balls[:]:
-        rect = b["rect"]
-        old_center = rect.center
-        b["vy"] += GRAVITY
-        rect.x += b["vx"]
-        rect.y += b["vy"]
-        new_center = rect.center
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
 
+        # input
+        keys = pygame.key.get_pressed()
+        new_target_vx = 0
+        if keys[pygame.K_LEFT] and paddle.left > 0:
+            new_target_vx = -PADDLE_SPEED
+        elif keys[pygame.K_RIGHT] and paddle.right < WIDTH:
+            new_target_vx = PADDLE_SPEED
+
+        if new_target_vx != paddle_target_vx:
+            paddle_target_vx = new_target_vx
+            paddle_start_vx = paddle_vx
+            transition_t = 0.0
+
+        if transition_t < 1.0:
+            transition_t = min(transition_t + TRANSITION_RATE * dt, 1.0)
+            prog = snappy_ease(transition_t)
+            paddle_vx = paddle_start_vx + (paddle_target_vx - paddle_start_vx) * prog
+        else:
+            paddle_vx = paddle_target_vx
+
+        paddle.x += paddle_vx
+        if paddle.left < 0:
+            paddle.left = 0
+        if paddle.right > WIDTH:
+            paddle.right = WIDTH
+
+        # spawn powerup
+        if powerup is None and random.random() < POWERUP_CHANCE:
+            powerup = spawn_powerup()
+
+        # update powerup timer
         if powerup is not None:
-            p_rect = powerup["rect"]
-            ball_id = b["id"]
-            if ball_id not in powerup["collided"]:
-                if p_rect.colliderect(rect) or p_rect.clipline(old_center, new_center):
-                    vx, vy = duplicate_velocity(b["vx"], b["vy"])
-                    nb = create_ball(up=b["vy"] < 0, pos=rect.center)
-                    nb["vx"], nb["vy"] = vx, vy
-                    powerup["collided"].update({ball_id, nb["id"]})
-                    balls.append(nb)
+            powerup["timer"] -= dt
+            if powerup["timer"] <= 0:
+                powerup = None
 
-        if rect.left <= 0 or rect.right >= WIDTH:
-            b["vx"] *= -1
+        # update balls
+        for b in balls[:]:
+            rect = b["rect"]
+            old_center = rect.center
+            b["vy"] += GRAVITY
+            rect.x += b["vx"]
+            rect.y += b["vy"]
+            new_center = rect.center
 
-        if rect.top <= 0:
-            b["vy"] *= -1
-            speed = math.hypot(b["vx"], b["vy"])
-            if speed < MAX_BALL_SPEED:
-                speed = min(speed * SPEED_INCREMENT, MAX_BALL_SPEED)
-                angle = math.atan2(b["vy"], b["vx"])
-                b["vx"] = int(round(math.cos(angle) * speed))
-                b["vy"] = int(round(math.sin(angle) * speed))
+            if powerup is not None:
+                p_rect = powerup["rect"]
+                ball_id = b["id"]
+                if ball_id not in powerup["collided"]:
+                    if p_rect.colliderect(rect) or p_rect.clipline(old_center, new_center):
+                        vx, vy = duplicate_velocity(b["vx"], b["vy"])
+                        nb = create_ball(up=b["vy"] < 0, pos=rect.center)
+                        nb["vx"], nb["vy"] = vx, vy
+                        powerup["collided"].update({ball_id, nb["id"]})
+                        balls.append(nb)
 
-        if rect.colliderect(paddle) and b["vy"] > 0:
-            offset = (rect.centerx - paddle.centerx) / (PADDLE_WIDTH / 2)
-            b["vy"] *= -1
-            b["vx"] += offset * ANGLE_INFLUENCE + paddle_vx * PADDLE_VEL_INFLUENCE
-            b["vx"] = max(min(b["vx"] * SPEED_INCREMENT, MAX_BALL_SPEED), -MAX_BALL_SPEED)
-            b["vy"] = max(min(b["vy"] * SPEED_INCREMENT, MAX_BALL_SPEED), -MAX_BALL_SPEED)
-            score += 1
+            if rect.left <= 0 or rect.right >= WIDTH:
+                b["vx"] *= -1
 
-        if rect.top > HEIGHT:
-            balls.remove(b)
+            if rect.top <= 0:
+                b["vy"] *= -1
+                speed = math.hypot(b["vx"], b["vy"])
+                if speed < MAX_BALL_SPEED:
+                    speed = min(speed * SPEED_INCREMENT, MAX_BALL_SPEED)
+                    angle = math.atan2(b["vy"], b["vx"])
+                    b["vx"] = int(round(math.cos(angle) * speed))
+                    b["vy"] = int(round(math.sin(angle) * speed))
 
-    if not balls:
-        score = 0
-        balls.append(create_ball())
+            if rect.colliderect(paddle) and b["vy"] > 0:
+                offset = (rect.centerx - paddle.centerx) / (PADDLE_WIDTH / 2)
+                b["vy"] *= -1
+                b["vx"] += offset * ANGLE_INFLUENCE + paddle_vx * PADDLE_VEL_INFLUENCE
+                b["vx"] = max(min(b["vx"] * SPEED_INCREMENT, MAX_BALL_SPEED), -MAX_BALL_SPEED)
+                b["vy"] = max(min(b["vy"] * SPEED_INCREMENT, MAX_BALL_SPEED), -MAX_BALL_SPEED)
+                score += 1
 
-    # draw
-    screen.fill("black")
-    pygame.draw.rect(screen, "white", paddle)
-    for b in balls:
-        pygame.draw.ellipse(screen, "white", b["rect"])
-    if powerup is not None:
-        pygame.draw.rect(screen, "yellow", powerup["rect"])
+            if rect.top > HEIGHT:
+                balls.remove(b)
 
-    score_surf = font.render(f"Score: {score}", True, "white")
-    screen.blit(score_surf, (WIDTH - score_surf.get_width() - 10, 10))
+        if not balls:
+            return score
 
-    pygame.display.flip()
+        # draw
+        screen.fill("black")
+        pygame.draw.rect(screen, "white", paddle)
+        for b in balls:
+            pygame.draw.ellipse(screen, "white", b["rect"])
+        if powerup is not None:
+            pygame.draw.rect(screen, "yellow", powerup["rect"])
+
+        score_surf = font.render(f"Score: {score}", True, "white")
+        screen.blit(score_surf, (WIDTH - score_surf.get_width() - 10, 10))
+
+        pygame.display.flip()
+
+
+def main() -> None:
+    run_menu()
+    while True:
+        final_score = run_game()
+        choice = run_game_over(final_score)
+        if choice == "retry":
+            continue
+        else:
+            run_menu()
+
+
+if __name__ == "__main__":
+    pygame.init()
+    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    pygame.display.set_caption("Single-Player Pong")
+    clock = pygame.time.Clock()
+    font = pygame.font.SysFont(None, 32)
+    main()
