@@ -16,3 +16,7 @@ A simple single-player Pong game built in Python using Pygame.
 
    ```bash
    pip install pygame
+   ```
+
+The ball speeds up slightly with each successful paddle hit, making the
+game progressively more challenging.
