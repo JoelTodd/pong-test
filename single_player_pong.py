@@ -240,54 +240,87 @@ def run_game() -> int:
         if powerup is None and random.random() < POWERUP_CHANCE:
             powerup = spawn_powerup()
 
-        # update powerup timer
+        # update powerup timer and handle collision only if powerup exists
         if powerup is not None:
             powerup["timer"] -= dt
             if powerup["timer"] <= 0:
                 powerup = None
+            else:
+                for b in balls[:]:
+                    rect = b["rect"]
+                    old_center = rect.center
+                    b["vy"] += GRAVITY
+                    rect.x += b["vx"]
+                    rect.y += b["vy"]
+                    new_center = rect.center
 
-        # update balls
-        for b in balls[:]:
-            rect = b["rect"]
-            old_center = rect.center
-            b["vy"] += GRAVITY
-            rect.x += b["vx"]
-            rect.y += b["vy"]
-            new_center = rect.center
+                    p_rect = powerup["rect"]
+                    ball_id = b["id"]
+                    colliding = p_rect.colliderect(rect) or p_rect.clipline(old_center, new_center)
+                    if colliding:
+                        if ball_id not in powerup["collided"]:
+                            vx, vy = duplicate_velocity(b["vx"], b["vy"])
+                            nb = create_ball(up=b["vy"] < 0, pos=rect.center)
+                            nb["vx"], nb["vy"] = vx, vy
+                            powerup["collided"].update({ball_id, nb["id"]})
+                            balls.append(nb)
+                    else:
+                        powerup["collided"].discard(ball_id)
 
-            if powerup is not None:
-                p_rect = powerup["rect"]
-                ball_id = b["id"]
-                if ball_id not in powerup["collided"]:
-                    if p_rect.colliderect(rect) or p_rect.clipline(old_center, new_center):
-                        vx, vy = duplicate_velocity(b["vx"], b["vy"])
-                        nb = create_ball(up=b["vy"] < 0, pos=rect.center)
-                        nb["vx"], nb["vy"] = vx, vy
-                        powerup["collided"].update({ball_id, nb["id"]})
-                        balls.append(nb)
+                    if rect.left <= 0 or rect.right >= WIDTH:
+                        b["vx"] *= -1
 
-            if rect.left <= 0 or rect.right >= WIDTH:
-                b["vx"] *= -1
+                    if rect.top <= 0:
+                        b["vy"] *= -1
+                        speed = math.hypot(b["vx"], b["vy"])
+                        if speed < MAX_BALL_SPEED:
+                            speed = min(speed * SPEED_INCREMENT, MAX_BALL_SPEED)
+                            angle = math.atan2(b["vy"], b["vx"])
+                            b["vx"] = int(round(math.cos(angle) * speed))
+                            b["vy"] = int(round(math.sin(angle) * speed))
 
-            if rect.top <= 0:
-                b["vy"] *= -1
-                speed = math.hypot(b["vx"], b["vy"])
-                if speed < MAX_BALL_SPEED:
-                    speed = min(speed * SPEED_INCREMENT, MAX_BALL_SPEED)
-                    angle = math.atan2(b["vy"], b["vx"])
-                    b["vx"] = int(round(math.cos(angle) * speed))
-                    b["vy"] = int(round(math.sin(angle) * speed))
+                    if rect.colliderect(paddle) and b["vy"] > 0:
+                        offset = (rect.centerx - paddle.centerx) / (PADDLE_WIDTH / 2)
+                        b["vy"] *= -1
+                        b["vx"] += offset * ANGLE_INFLUENCE + paddle_vx * PADDLE_VEL_INFLUENCE
+                        b["vx"] = max(min(b["vx"] * SPEED_INCREMENT, MAX_BALL_SPEED), -MAX_BALL_SPEED)
+                        b["vy"] = max(min(b["vy"] * SPEED_INCREMENT, MAX_BALL_SPEED), -MAX_BALL_SPEED)
+                        score += 1
 
-            if rect.colliderect(paddle) and b["vy"] > 0:
-                offset = (rect.centerx - paddle.centerx) / (PADDLE_WIDTH / 2)
-                b["vy"] *= -1
-                b["vx"] += offset * ANGLE_INFLUENCE + paddle_vx * PADDLE_VEL_INFLUENCE
-                b["vx"] = max(min(b["vx"] * SPEED_INCREMENT, MAX_BALL_SPEED), -MAX_BALL_SPEED)
-                b["vy"] = max(min(b["vy"] * SPEED_INCREMENT, MAX_BALL_SPEED), -MAX_BALL_SPEED)
-                score += 1
+                    if rect.top > HEIGHT:
+                        balls.remove(b)
+        else:
+            # Update balls even if there is no powerup
+            for b in balls[:]:
+                rect = b["rect"]
+                old_center = rect.center
+                b["vy"] += GRAVITY
+                rect.x += b["vx"]
+                rect.y += b["vy"]
+                new_center = rect.center
 
-            if rect.top > HEIGHT:
-                balls.remove(b)
+                if rect.left <= 0 or rect.right >= WIDTH:
+                    b["vx"] *= -1
+
+                if rect.top <= 0:
+                    b["vy"] *= -1
+                    speed = math.hypot(b["vx"], b["vy"])
+                    if speed < MAX_BALL_SPEED:
+                        speed = min(speed * SPEED_INCREMENT, MAX_BALL_SPEED)
+                        angle = math.atan2(b["vy"], b["vx"])
+                        b["vx"] = int(round(math.cos(angle) * speed))
+                        b["vy"] = int(round(math.sin(angle) * speed))
+
+                if rect.colliderect(paddle) and b["vy"] > 0:
+                    offset = (rect.centerx - paddle.centerx) / (PADDLE_WIDTH / 2)
+                    b["vy"] *= -1
+                    b["vx"] += offset * ANGLE_INFLUENCE + paddle_vx * PADDLE_VEL_INFLUENCE
+                    b["vx"] = max(min(b["vx"] * SPEED_INCREMENT, MAX_BALL_SPEED), -MAX_BALL_SPEED)
+                    b["vy"] = max(min(b["vy"] * SPEED_INCREMENT, MAX_BALL_SPEED), -MAX_BALL_SPEED)
+                    score += 1
+
+                if rect.top > HEIGHT:
+                    balls.remove(b)
 
         if not balls:
             return score
@@ -304,6 +337,7 @@ def run_game() -> int:
         screen.blit(score_surf, (WIDTH - score_surf.get_width() - 10, 10))
 
         pygame.display.flip()
+
 
 
 def main() -> None:
