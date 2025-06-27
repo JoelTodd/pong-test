@@ -13,8 +13,8 @@ BALL_SPEED_Y_RANGE = (4, 6)        # choose y speed randomly in this range
 SPEED_INCREMENT = 1.08             # 5% speed increase on every paddle hit
 MAX_BALL_SPEED = 50                # cap the speed so the game stays playable
 TRANSITION_RATE = 12               # higher is snappier paddle acceleration
-POWERUP_SIZE = 16
-POWERUP_FALL_SPEED = 2
+POWERUP_WIDTH, POWERUP_HEIGHT = 60, 10
+POWERUP_DURATION = 8.0
 POWERUP_CHANCE = 0.005            # chance each frame that a powerup appears
 
 
@@ -59,21 +59,29 @@ def duplicate_velocity(vy_current: int) -> tuple[int, int]:
     return vx, vy
 
 
+next_ball_id = 0
+
+
 def create_ball(up: bool = False, pos: tuple[int, int] | None = None) -> dict:
-    """Create a new ball dictionary."""
+    """Create a new ball dictionary with a unique id."""
+    global next_ball_id
     rect = pygame.Rect(0, 0, BALL_SIZE, BALL_SIZE)
     if pos is None:
         rect.center = (random.randint(40, WIDTH - 40), HEIGHT // 2)
     else:
         rect.center = pos
     vx, vy = random_velocity(up)
-    return {"rect": rect, "vx": vx, "vy": vy}
+    ball = {"rect": rect, "vx": vx, "vy": vy, "id": next_ball_id}
+    next_ball_id += 1
+    return ball
 
 
-def spawn_powerup() -> pygame.Rect:
-    """Return a powerup rect positioned randomly near the top."""
-    x = random.randint(20, WIDTH - POWERUP_SIZE - 20)
-    return pygame.Rect(x, -POWERUP_SIZE, POWERUP_SIZE, POWERUP_SIZE)
+def spawn_powerup() -> dict:
+    """Return a new powerup dictionary."""
+    x = random.randint(20, WIDTH - POWERUP_WIDTH - 20)
+    y = random.randint(80, HEIGHT // 2)
+    rect = pygame.Rect(x, y, POWERUP_WIDTH, POWERUP_HEIGHT)
+    return {"rect": rect, "timer": POWERUP_DURATION, "collided": set()}
 
 # --- init
 pygame.init()
@@ -139,19 +147,23 @@ while True:
     if powerup is None and random.random() < POWERUP_CHANCE:
         powerup = spawn_powerup()
 
-    # move powerup
+    # update powerup
     if powerup is not None:
-        powerup.y += POWERUP_FALL_SPEED
-        if powerup.top > HEIGHT:
+        powerup["timer"] -= dt
+        if powerup["timer"] <= 0:
             powerup = None
-        elif powerup.colliderect(paddle):
-            new_balls = []
-            for b in balls:
-                vx, vy = duplicate_velocity(b["vy"])
-                nb = pygame.Rect(b["rect"].centerx, b["rect"].centery, BALL_SIZE, BALL_SIZE)
-                new_balls.append({"rect": nb, "vx": vx, "vy": vy})
-            balls.extend(new_balls)
-            powerup = None
+        else:
+            rect = powerup["rect"]
+            for b in balls[:]:
+                ball_id = b["id"]
+                if ball_id in powerup["collided"]:
+                    continue
+                if rect.colliderect(b["rect"]):
+                    vx, vy = duplicate_velocity(b["vy"])
+                    nb = create_ball(up=b["vy"] < 0, pos=b["rect"].center)
+                    nb["vx"], nb["vy"] = vx, vy
+                    powerup["collided"].update({ball_id, nb["id"]})
+                    balls.append(nb)
 
     # update balls
     for b in balls[:]:
@@ -184,7 +196,7 @@ while True:
     for b in balls:
         pygame.draw.ellipse(screen, "white", b["rect"])
     if powerup is not None:
-        pygame.draw.rect(screen, "yellow", powerup)
+        pygame.draw.rect(screen, "yellow", powerup["rect"])
 
     score_surf = font.render(f"Score: {score}", True, "white")
     screen.blit(score_surf, (WIDTH - score_surf.get_width() - 10, 10))
