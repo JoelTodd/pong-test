@@ -92,12 +92,58 @@ def spawn_powerup() -> dict:
     rect = pygame.Rect(x, y, POWERUP_WIDTH, POWERUP_HEIGHT)
     return {"rect": rect, "timer": POWERUP_DURATION, "collided": set()}
 
+
+def run_menu() -> None:
+    """Display a simple start menu until the user begins or quits."""
+    options = ["Start Game", "Quit"]
+    selected = 0
+    title_font = pygame.font.SysFont(None, 48)
+    menu_font = pygame.font.SysFont(None, 32)
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key in (pygame.K_UP, pygame.K_w):
+                    selected = (selected - 1) % len(options)
+                elif event.key in (pygame.K_DOWN, pygame.K_s):
+                    selected = (selected + 1) % len(options)
+                elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
+                    if options[selected] == "Start Game":
+                        return
+                    else:
+                        pygame.quit()
+                        sys.exit()
+
+        screen.fill("black")
+
+        title_surf = title_font.render("Single-Player Pong", True, "white")
+        screen.blit(
+            title_surf,
+            (WIDTH // 2 - title_surf.get_width() // 2, HEIGHT // 3 - 50),
+        )
+
+        for i, option in enumerate(options):
+            color = "yellow" if i == selected else "white"
+            surf = menu_font.render(option, True, color)
+            screen.blit(
+                surf,
+                (WIDTH // 2 - surf.get_width() // 2, HEIGHT // 2 + i * 40),
+            )
+
+        pygame.display.flip()
+        clock.tick(FPS)
+
 # --- init
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Single-Player Pong")
 clock = pygame.time.Clock()
 font = pygame.font.SysFont(None, 32)
+
+run_menu()
 
 # --- game objects
 paddle = pygame.Rect(

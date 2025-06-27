@@ -19,6 +19,9 @@ scrolls vertically with your paddle at the bottom of the screen.
    pip install pygame
    ```
 
+Run the script and a small menu will appear. Use the arrow keys to select
+"Start Game" or "Quit" and press Enter to confirm.
+
 The ball speeds up slightly with each successful paddle hit, making the
 game progressively more challenging. Keep an eye out for the yellow powerup
 that appears as a short, unmoving paddle. It sticks around for a few seconds
