@@ -13,6 +13,9 @@ BALL_SPEED_Y_RANGE = (4, 6)        # choose y speed randomly in this range
 SPEED_INCREMENT = 1.08             # 5% speed increase on every paddle hit
 MAX_BALL_SPEED = 50                # cap the speed so the game stays playable
 TRANSITION_RATE = 12               # higher is snappier paddle acceleration
+POWERUP_SIZE = 16
+POWERUP_FALL_SPEED = 2
+POWERUP_CHANCE = 0.005            # chance each frame that a powerup appears
 
 
 def cubic_bezier(t, p0, p1, p2, p3):
@@ -30,6 +33,36 @@ def snappy_ease(t: float) -> float:
     t = max(0.0, min(1.0, t))
     return cubic_bezier(t, 0.0, 0.1, 0.9, 1.0)
 
+
+def random_velocity(up: bool = False) -> tuple[int, int]:
+    """Return a random (vx, vy) pair.
+
+    If ``up`` is True the velocity will not send the ball downward.
+    """
+    vx_candidates = [v for v in range(*BALL_SPEED_X_RANGE)]
+    vx = random.choice(vx_candidates)
+    vy = random.choice(range(*BALL_SPEED_Y_RANGE))
+    if up:
+        vy *= -1
+    return vx, vy
+
+
+def create_ball(up: bool = False, pos: tuple[int, int] | None = None) -> dict:
+    """Create a new ball dictionary."""
+    rect = pygame.Rect(0, 0, BALL_SIZE, BALL_SIZE)
+    if pos is None:
+        rect.center = (random.randint(40, WIDTH - 40), HEIGHT // 2)
+    else:
+        rect.center = pos
+    vx, vy = random_velocity(up)
+    return {"rect": rect, "vx": vx, "vy": vy}
+
+
+def spawn_powerup() -> pygame.Rect:
+    """Return a powerup rect positioned randomly near the top."""
+    x = random.randint(20, WIDTH - POWERUP_SIZE - 20)
+    return pygame.Rect(x, -POWERUP_SIZE, POWERUP_SIZE, POWERUP_SIZE)
+
 # --- init
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -38,19 +71,15 @@ clock = pygame.time.Clock()
 font = pygame.font.SysFont(None, 32)
 
 # --- game objects
-paddle = pygame.Rect(WIDTH // 2 - PADDLE_WIDTH // 2,
-                     HEIGHT - 20 - PADDLE_HEIGHT,
-                     PADDLE_WIDTH, PADDLE_HEIGHT)
-ball = pygame.Rect(WIDTH // 2, HEIGHT // 2, BALL_SIZE, BALL_SIZE)
+paddle = pygame.Rect(
+    WIDTH // 2 - PADDLE_WIDTH // 2,
+    HEIGHT - 20 - PADDLE_HEIGHT,
+    PADDLE_WIDTH,
+    PADDLE_HEIGHT,
+)
 
-def reset_ball():
-    ball.center = (random.randint(40, WIDTH - 40), HEIGHT // 2)
-    vx_candidates = [v for v in range(*BALL_SPEED_X_RANGE) if v != 0]
-    vx = random.choice(vx_candidates)
-    vy = random.choice(range(*BALL_SPEED_Y_RANGE))    # always heads down
-    return vx, vy
-
-ball_vx, ball_vy = reset_ball()
+balls = [create_ball()]
+powerup = None
 score = 0
 
 # paddle movement smoothing
@@ -94,34 +123,56 @@ while True:
     if paddle.right > WIDTH:
         paddle.right = WIDTH
 
-    # update ball
-    ball.x += ball_vx
-    ball.y += ball_vy
+    # spawn powerup
+    if powerup is None and random.random() < POWERUP_CHANCE:
+        powerup = spawn_powerup()
 
-    # bounce off left / right walls
-    if ball.left <= 0 or ball.right >= WIDTH:
-        ball_vx *= -1
+    # move powerup
+    if powerup is not None:
+        powerup.y += POWERUP_FALL_SPEED
+        if powerup.top > HEIGHT:
+            powerup = None
+        elif powerup.colliderect(paddle):
+            new_balls = []
+            for b in balls:
+                vx, vy = random_velocity(up=True)
+                nb = pygame.Rect(b["rect"].centerx, b["rect"].centery, BALL_SIZE, BALL_SIZE)
+                new_balls.append({"rect": nb, "vx": vx, "vy": vy})
+            balls.extend(new_balls)
+            powerup = None
 
-    # bounce off top
-    if ball.top <= 0:
-        ball_vy *= -1
+    # update balls
+    for b in balls[:]:
+        rect = b["rect"]
+        rect.x += b["vx"]
+        rect.y += b["vy"]
 
-    # bounce off paddle
-    if ball.colliderect(paddle) and ball_vy > 0:
-        ball_vy *= -1
-        ball_vx = max(min(ball_vx * SPEED_INCREMENT, MAX_BALL_SPEED), -MAX_BALL_SPEED)
-        ball_vy = max(min(ball_vy * SPEED_INCREMENT, MAX_BALL_SPEED), -MAX_BALL_SPEED)
-        score += 1
+        if rect.left <= 0 or rect.right >= WIDTH:
+            b["vx"] *= -1
 
-    # ball missed
-    if ball.top > HEIGHT:
+        if rect.top <= 0:
+            b["vy"] *= -1
+
+        if rect.colliderect(paddle) and b["vy"] > 0:
+            b["vy"] *= -1
+            b["vx"] = max(min(b["vx"] * SPEED_INCREMENT, MAX_BALL_SPEED), -MAX_BALL_SPEED)
+            b["vy"] = max(min(b["vy"] * SPEED_INCREMENT, MAX_BALL_SPEED), -MAX_BALL_SPEED)
+            score += 1
+
+        if rect.top > HEIGHT:
+            balls.remove(b)
+
+    if not balls:
         score = 0
-        ball_vx, ball_vy = reset_ball()
+        balls.append(create_ball())
 
     # draw
     screen.fill("black")
     pygame.draw.rect(screen, "white", paddle)
-    pygame.draw.ellipse(screen, "white", ball)
+    for b in balls:
+        pygame.draw.ellipse(screen, "white", b["rect"])
+    if powerup is not None:
+        pygame.draw.rect(screen, "yellow", powerup)
 
     score_surf = font.render(f"Score: {score}", True, "white")
     screen.blit(score_surf, (WIDTH - score_surf.get_width() - 10, 10))
