@@ -37,12 +37,24 @@ def snappy_ease(t: float) -> float:
 def random_velocity(up: bool = False) -> tuple[int, int]:
     """Return a random (vx, vy) pair.
 
-    If ``up`` is True the velocity will not send the ball downward.
+    If ``up`` is True the ball will travel upward, otherwise downward.
+    The horizontal component may be zero.
     """
-    vx_candidates = [v for v in range(*BALL_SPEED_X_RANGE)]
-    vx = random.choice(vx_candidates)
+    vx = random.choice(list(range(*BALL_SPEED_X_RANGE)))
     vy = random.choice(range(*BALL_SPEED_Y_RANGE))
     if up:
+        vy *= -1
+    return vx, vy
+
+
+def duplicate_velocity(vy_current: int) -> tuple[int, int]:
+    """Return a new velocity keeping the same vertical direction as ``vy_current``.
+
+    The duplicated ball will never move directly sideways."""
+    vx_candidates = [v for v in range(*BALL_SPEED_X_RANGE) if v != 0]
+    vx = random.choice(vx_candidates)
+    vy = random.choice(range(*BALL_SPEED_Y_RANGE))
+    if vy_current < 0:
         vy *= -1
     return vx, vy
 
@@ -135,7 +147,7 @@ while True:
         elif powerup.colliderect(paddle):
             new_balls = []
             for b in balls:
-                vx, vy = random_velocity(up=True)
+                vx, vy = duplicate_velocity(b["vy"])
                 nb = pygame.Rect(b["rect"].centerx, b["rect"].centery, BALL_SIZE, BALL_SIZE)
                 new_balls.append({"rect": nb, "vx": vx, "vy": vy})
             balls.extend(new_balls)

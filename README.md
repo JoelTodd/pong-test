@@ -22,5 +22,6 @@ scrolls vertically with your paddle at the bottom of the screen.
 The ball speeds up slightly with each successful paddle hit, making the
 game progressively more challenging. Keep an eye out for the yellow powerup
 that occasionally drifts down the screen—catching it duplicates every ball in
-play with each copy launched in a random direction that never heads downward or
-directly sideways. The game only resets when every ball has been missed.
+play with each copy launched in a random direction that keeps the same upward
+or downward motion as the original ball while never travelling perfectly
+sideways. The game only resets when every ball has been missed.
