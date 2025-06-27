@@ -12,6 +12,23 @@ BALL_SPEED_X_RANGE = (-4, 4)       # choose x speed randomly in this range
 BALL_SPEED_Y_RANGE = (4, 6)        # choose y speed randomly in this range
 SPEED_INCREMENT = 1.05             # 5% speed increase on every paddle hit
 MAX_BALL_SPEED = 50                # cap the speed so the game stays playable
+TRANSITION_RATE = 10               # higher is snappier paddle acceleration
+
+
+def cubic_bezier(t, p0, p1, p2, p3):
+    """Simple cubic Bezier curve evaluator."""
+    return (
+        (1 - t) ** 3 * p0
+        + 3 * (1 - t) ** 2 * t * p1
+        + 3 * (1 - t) * t ** 2 * p2
+        + t ** 3 * p3
+    )
+
+
+def snappy_ease(t: float) -> float:
+    """Return a smooth yet quick easing value for 0<=t<=1."""
+    t = max(0.0, min(1.0, t))
+    return cubic_bezier(t, 0.0, 0.1, 0.9, 1.0)
 
 # --- init
 pygame.init()
@@ -36,8 +53,16 @@ def reset_ball():
 ball_vx, ball_vy = reset_ball()
 score = 0
 
+# paddle movement smoothing
+paddle_vx = 0
+paddle_target_vx = 0
+paddle_start_vx = 0
+transition_t = 1.0
+
 # --- main loop
 while True:
+    dt = clock.tick(FPS) / 1000.0
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -45,10 +70,29 @@ while True:
 
     # input
     keys = pygame.key.get_pressed()
+    new_target_vx = 0
     if keys[pygame.K_LEFT] and paddle.left > 0:
-        paddle.x -= PADDLE_SPEED
-    if keys[pygame.K_RIGHT] and paddle.right < WIDTH:
-        paddle.x += PADDLE_SPEED
+        new_target_vx = -PADDLE_SPEED
+    elif keys[pygame.K_RIGHT] and paddle.right < WIDTH:
+        new_target_vx = PADDLE_SPEED
+
+    if new_target_vx != paddle_target_vx:
+        paddle_target_vx = new_target_vx
+        paddle_start_vx = paddle_vx
+        transition_t = 0.0
+
+    if transition_t < 1.0:
+        transition_t = min(transition_t + TRANSITION_RATE * dt, 1.0)
+        prog = snappy_ease(transition_t)
+        paddle_vx = paddle_start_vx + (paddle_target_vx - paddle_start_vx) * prog
+    else:
+        paddle_vx = paddle_target_vx
+
+    paddle.x += paddle_vx
+    if paddle.left < 0:
+        paddle.left = 0
+    if paddle.right > WIDTH:
+        paddle.right = WIDTH
 
     # update ball
     ball.x += ball_vx
@@ -83,4 +127,3 @@ while True:
     screen.blit(score_surf, (WIDTH - score_surf.get_width() - 10, 10))
 
     pygame.display.flip()
-    clock.tick(FPS)
