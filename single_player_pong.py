@@ -55,6 +55,10 @@ while True:
     if ball.top <= 0 or ball.bottom >= HEIGHT:
         ball_vy *= -1
 
+    # bounce off right wall
+    if ball.right >= WIDTH and ball_vx > 0:
+        ball_vx *= -1
+
     # bounce off paddle
     if ball.colliderect(paddle) and ball_vx < 0:
         ball_vx *= -1
