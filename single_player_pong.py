@@ -10,8 +10,8 @@ PADDLE_WIDTH, PADDLE_HEIGHT = 80, 6
 BALL_SIZE = 12
 PADDLE_SPEED = 8
 BALL_SPEED_X_RANGE = (-4, 4)       # choose x speed randomly in this range
-BALL_SPEED_Y_RANGE = (4, 6)        # choose y speed randomly in this range
-SPEED_INCREMENT = 1.08             # 5% speed increase on every paddle hit
+BALL_SPEED_Y_RANGE = (2, 4)        # choose y speed randomly in this range (slow start)
+SPEED_INCREMENT = 1.08             # 8% speed increase after top bounce
 MAX_BALL_SPEED = 50                # cap the speed so the game stays playable
 TRANSITION_RATE = 12               # higher is snappier paddle acceleration
 POWERUP_WIDTH, POWERUP_HEIGHT = 100, 4
@@ -232,13 +232,23 @@ while True:
 
         if rect.top <= 0:
             b["vy"] *= -1
+            speed = math.hypot(b["vx"], b["vy"])
+            if speed < MAX_BALL_SPEED:
+                speed = min(speed * SPEED_INCREMENT, MAX_BALL_SPEED)
+                angle = math.atan2(b["vy"], b["vx"])
+                b["vx"] = int(round(math.cos(angle) * speed))
+                b["vy"] = int(round(math.sin(angle) * speed))
 
         if rect.colliderect(paddle) and b["vy"] > 0:
             offset = (rect.centerx - paddle.centerx) / (PADDLE_WIDTH / 2)
+            speed = math.hypot(b["vx"], b["vy"])
             b["vy"] *= -1
             b["vx"] += offset * ANGLE_INFLUENCE + paddle_vx * PADDLE_VEL_INFLUENCE
-            b["vx"] = max(min(b["vx"] * SPEED_INCREMENT, MAX_BALL_SPEED), -MAX_BALL_SPEED)
-            b["vy"] = max(min(b["vy"] * SPEED_INCREMENT, MAX_BALL_SPEED), -MAX_BALL_SPEED)
+            current_speed = math.hypot(b["vx"], b["vy"])
+            if current_speed:
+                scale = speed / current_speed
+                b["vx"] = int(round(b["vx"] * scale))
+                b["vy"] = int(round(b["vy"] * scale))
             score += 1
 
         if rect.top > HEIGHT:
