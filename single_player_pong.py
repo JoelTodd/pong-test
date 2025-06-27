@@ -17,6 +17,9 @@ TRANSITION_RATE = 12               # higher is snappier paddle acceleration
 POWERUP_WIDTH, POWERUP_HEIGHT = 100, 4
 POWERUP_DURATION = 8.0
 POWERUP_CHANCE = 0.005            # chance each frame that a powerup appears
+ANGLE_INFLUENCE = 5               # horizontal change from paddle impact
+PADDLE_VEL_INFLUENCE = 0.5        # fraction of paddle velocity transferred
+GRAVITY = 0.1                     # downward acceleration each frame
 
 
 def cubic_bezier(t, p0, p1, p2, p3):
@@ -174,6 +177,7 @@ while True:
     # update balls
     for b in balls[:]:
         rect = b["rect"]
+        b["vy"] += GRAVITY
         rect.x += b["vx"]
         rect.y += b["vy"]
 
@@ -184,7 +188,9 @@ while True:
             b["vy"] *= -1
 
         if rect.colliderect(paddle) and b["vy"] > 0:
+            offset = (rect.centerx - paddle.centerx) / (PADDLE_WIDTH / 2)
             b["vy"] *= -1
+            b["vx"] += offset * ANGLE_INFLUENCE + paddle_vx * PADDLE_VEL_INFLUENCE
             b["vx"] = max(min(b["vx"] * SPEED_INCREMENT, MAX_BALL_SPEED), -MAX_BALL_SPEED)
             b["vy"] = max(min(b["vy"] * SPEED_INCREMENT, MAX_BALL_SPEED), -MAX_BALL_SPEED)
             score += 1
