@@ -80,7 +80,7 @@ def create_ball(up: bool = False, pos: tuple[int, int] | None = None) -> dict:
     else:
         rect.center = pos
     vx, vy = random_velocity(up)
-    ball = {"rect": rect, "vx": vx, "vy": vy, "id": next_ball_id}
+    ball = {"rect": rect, "vx": vx, "vy": vy, "ax": 0.0, "ay": 0.0, "id": next_ball_id}
     next_ball_id += 1
     return ball
 
@@ -142,6 +142,8 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Single-Player Pong")
 clock = pygame.time.Clock()
 font = pygame.font.SysFont(None, 32)
+debug_font = pygame.font.SysFont(None, 24)
+debug_mode = False
 
 run_menu()
 
@@ -171,6 +173,8 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_m:
+            debug_mode = not debug_mode
 
     # input
     keys = pygame.key.get_pressed()
@@ -212,6 +216,8 @@ while True:
     for b in balls[:]:
         rect = b["rect"]
         old_center = rect.center
+        prev_vx = b["vx"]
+        prev_vy = b["vy"]
         b["vy"] += GRAVITY
         rect.x += b["vx"]
         rect.y += b["vy"]
@@ -248,6 +254,13 @@ while True:
             b["vy"] = max(min(b["vy"] * SPEED_INCREMENT, MAX_BALL_SPEED), -MAX_BALL_SPEED)
             score += 1
 
+        if dt > 0:
+            b["ax"] = (b["vx"] - prev_vx) / dt
+            b["ay"] = (b["vy"] - prev_vy) / dt
+        else:
+            b["ax"] = 0.0
+            b["ay"] = 0.0
+
         if rect.top > HEIGHT:
             balls.remove(b)
 
@@ -265,5 +278,19 @@ while True:
 
     score_surf = font.render(f"Score: {score}", True, "white")
     screen.blit(score_surf, (WIDTH - score_surf.get_width() - 10, 10))
+
+    if debug_mode:
+        lines = [f"Balls: {len(balls)}"]
+        for b in balls:
+            speed = math.hypot(b["vx"], b["vy"])
+            accel = math.hypot(b.get("ax", 0.0), b.get("ay", 0.0))
+            lines.append(
+                f"id {b['id']} spd {speed:.2f} acc {accel:.2f}"
+            )
+        y = 10
+        for line in lines:
+            surf = debug_font.render(line, True, "green")
+            screen.blit(surf, (10, y))
+            y += surf.get_height() + 2
 
     pygame.display.flip()
