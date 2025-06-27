@@ -226,13 +226,16 @@ while True:
         if powerup is not None:
             p_rect = powerup["rect"]
             ball_id = b["id"]
-            if ball_id not in powerup["collided"]:
-                if p_rect.colliderect(rect) or p_rect.clipline(old_center, new_center):
+            colliding = p_rect.colliderect(rect) or p_rect.clipline(old_center, new_center)
+            if colliding:
+                if ball_id not in powerup["collided"]:
                     vx, vy = duplicate_velocity(b["vx"], b["vy"])
                     nb = create_ball(up=b["vy"] < 0, pos=rect.center)
                     nb["vx"], nb["vy"] = vx, vy
                     powerup["collided"].update({ball_id, nb["id"]})
                     balls.append(nb)
+            else:
+                powerup["collided"].discard(ball_id)
 
         if rect.left <= 0 or rect.right >= WIDTH:
             b["vx"] *= -1
