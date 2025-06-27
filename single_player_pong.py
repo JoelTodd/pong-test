@@ -146,16 +146,21 @@ def run_game_over(score: int) -> bool:
     title_font = pygame.font.SysFont(None, 48)
     text_font = pygame.font.SysFont(None, 32)
 
+    options = ["Try Again", "Main Menu"]
+    selected = 0
+
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.KEYDOWN:
-                if event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
-                    return True
-                if event.key == pygame.K_r:
-                    return False
+                if event.key in (pygame.K_UP, pygame.K_w):
+                    selected = (selected - 1) % len(options)
+                elif event.key in (pygame.K_DOWN, pygame.K_s):
+                    selected = (selected + 1) % len(options)
+                elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
+                    return options[selected] == "Main Menu"
 
         screen.fill("black")
 
@@ -171,13 +176,13 @@ def run_game_over(score: int) -> bool:
             (WIDTH // 2 - score_surf.get_width() // 2, HEIGHT // 2),
         )
 
-        hint_surf = text_font.render(
-            "Enter: menu   R: try again", True, "white"
-        )
-        screen.blit(
-            hint_surf,
-            (WIDTH // 2 - hint_surf.get_width() // 2, HEIGHT // 2 + 40),
-        )
+        for i, option in enumerate(options):
+            color = "yellow" if i == selected else "white"
+            surf = text_font.render(option, True, color)
+            screen.blit(
+                surf,
+                (WIDTH // 2 - surf.get_width() // 2, HEIGHT // 2 + 40 + i * 40),
+            )
 
         pygame.display.flip()
         clock.tick(FPS)
