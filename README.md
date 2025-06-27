@@ -1,6 +1,7 @@
 # Single Player Pong
 
-A simple single-player Pong game built in Python using Pygame.
+A simple single-player Pong game built in Python using Pygame. The action now
+scrolls vertically with your paddle at the bottom of the screen.
 
 ![Screenshot](Screenshot%202025-06-26%20212716.png)
 
