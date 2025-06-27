@@ -11,7 +11,7 @@ BALL_SIZE = 12
 PADDLE_SPEED = 8
 BALL_SPEED_X_RANGE = (-4, 4)       # choose x speed randomly in this range
 BALL_SPEED_Y_RANGE = (4, 6)        # choose y speed randomly in this range
-SPEED_INCREMENT = 1.08             # 5% speed increase on every paddle hit
+SPEED_INCREMENT = 1.08             # 8% speed increase after top bounce
 MAX_BALL_SPEED = 50                # cap the speed so the game stays playable
 TRANSITION_RATE = 12               # higher is snappier paddle acceleration
 POWERUP_WIDTH, POWERUP_HEIGHT = 100, 4
@@ -308,6 +308,7 @@ def run_game() -> bool:
             screen.blit(score_surf, (WIDTH - score_surf.get_width() - 10, 10))
 
             pygame.display.flip()
+
 
 
 run_menu()
