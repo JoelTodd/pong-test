@@ -242,14 +242,10 @@ while True:
 
         if rect.colliderect(paddle) and b["vy"] > 0:
             offset = (rect.centerx - paddle.centerx) / (PADDLE_WIDTH / 2)
-            speed = math.hypot(b["vx"], b["vy"])
             b["vy"] *= -1
             b["vx"] += offset * ANGLE_INFLUENCE + paddle_vx * PADDLE_VEL_INFLUENCE
-            current_speed = math.hypot(b["vx"], b["vy"])
-            if current_speed:
-                scale = speed / current_speed
-                b["vx"] = int(round(b["vx"] * scale))
-                b["vy"] = int(round(b["vy"] * scale))
+            b["vx"] = max(min(b["vx"] * SPEED_INCREMENT, MAX_BALL_SPEED), -MAX_BALL_SPEED)
+            b["vy"] = max(min(b["vy"] * SPEED_INCREMENT, MAX_BALL_SPEED), -MAX_BALL_SPEED)
             score += 1
 
         if rect.top > HEIGHT:

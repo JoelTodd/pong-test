@@ -22,7 +22,7 @@ scrolls vertically with your paddle at the bottom of the screen.
 Run the script and a small menu will appear. Use the arrow keys to select
 "Start Game" or "Quit" and press Enter to confirm.
 
-The ball now speeds up whenever it bounces off the top wall, leading to a
+The ball now speeds up whenever it bounces off the top wall or your paddle, leading to a
 steady progression from a slow start to a fast, chaotic end. Keep an eye out for the yellow powerup
 that appears as a short, unmoving paddle. It sticks around for a few seconds
 and duplicates any ball that passes through it from above or below, launching
