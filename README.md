@@ -25,7 +25,8 @@ Run the script and a small menu will appear. Use the arrow keys to select
 The ball now speeds up whenever it bounces off the top wall, leading to a
 steady progression from a slow start to a fast, chaotic end. Keep an eye out for the yellow powerup
 that appears as a short, unmoving paddle. It sticks around for a few seconds
-and duplicates any ball that passes through it, launching the new copy in a
-random direction that keeps the same vertical motion and overall speed as the
-source ball while never travelling perfectly sideways. The game only resets
+and duplicates any ball that passes through it from above or below, launching
+the new copy in a random direction that keeps the same vertical motion and
+overall speed as the source ball while never travelling perfectly sideways. The
+game only resets
 when every ball has been missed.

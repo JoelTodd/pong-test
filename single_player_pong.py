@@ -10,7 +10,7 @@ PADDLE_WIDTH, PADDLE_HEIGHT = 80, 6
 BALL_SIZE = 12
 PADDLE_SPEED = 8
 BALL_SPEED_X_RANGE = (-4, 4)       # choose x speed randomly in this range
-BALL_SPEED_Y_RANGE = (2, 4)        # choose y speed randomly in this range (slow start)
+BALL_SPEED_Y_RANGE = (4, 6)        # choose y speed randomly in this range
 SPEED_INCREMENT = 1.08             # 8% speed increase after top bounce
 MAX_BALL_SPEED = 50                # cap the speed so the game stays playable
 TRANSITION_RATE = 12               # higher is snappier paddle acceleration
@@ -202,30 +202,31 @@ while True:
     if powerup is None and random.random() < POWERUP_CHANCE:
         powerup = spawn_powerup()
 
-    # update powerup
+    # update powerup timer
     if powerup is not None:
         powerup["timer"] -= dt
         if powerup["timer"] <= 0:
             powerup = None
-        else:
-            rect = powerup["rect"]
-            for b in balls[:]:
-                ball_id = b["id"]
-                if ball_id in powerup["collided"]:
-                    continue
-                if rect.colliderect(b["rect"]):
-                    vx, vy = duplicate_velocity(b["vx"], b["vy"])
-                    nb = create_ball(up=b["vy"] < 0, pos=b["rect"].center)
-                    nb["vx"], nb["vy"] = vx, vy
-                    powerup["collided"].update({ball_id, nb["id"]})
-                    balls.append(nb)
 
     # update balls
     for b in balls[:]:
         rect = b["rect"]
+        old_center = rect.center
         b["vy"] += GRAVITY
         rect.x += b["vx"]
         rect.y += b["vy"]
+        new_center = rect.center
+
+        if powerup is not None:
+            p_rect = powerup["rect"]
+            ball_id = b["id"]
+            if ball_id not in powerup["collided"]:
+                if p_rect.colliderect(rect) or p_rect.clipline(old_center, new_center):
+                    vx, vy = duplicate_velocity(b["vx"], b["vy"])
+                    nb = create_ball(up=b["vy"] < 0, pos=rect.center)
+                    nb["vx"], nb["vy"] = vx, vy
+                    powerup["collided"].update({ball_id, nb["id"]})
+                    balls.append(nb)
 
         if rect.left <= 0 or rect.right >= WIDTH:
             b["vx"] *= -1
