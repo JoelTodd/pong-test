@@ -3,7 +3,7 @@ import sys
 import random
 
 # --- game constants
-WIDTH, HEIGHT = 640, 480
+WIDTH, HEIGHT = 512, 640
 FPS = 60
 PADDLE_WIDTH, PADDLE_HEIGHT = 80, 10
 BALL_SIZE = 12
