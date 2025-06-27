@@ -7,11 +7,11 @@ WIDTH, HEIGHT = 640, 480
 FPS = 60
 PADDLE_WIDTH, PADDLE_HEIGHT = 10, 80
 BALL_SIZE = 12
-PADDLE_SPEED = 6
+PADDLE_SPEED = 7
 BALL_SPEED_X_RANGE = (4, 6)        # choose x speed randomly in this range
 BALL_SPEED_Y_RANGE = (-4, 4)       # choose y speed randomly in this range
 SPEED_INCREMENT = 1.05             # 5% speed increase on every paddle hit
-MAX_BALL_SPEED = 10                # cap the speed so the game stays playable
+MAX_BALL_SPEED = 50                # cap the speed so the game stays playable
 
 # --- init
 pygame.init()
