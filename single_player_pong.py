@@ -19,7 +19,7 @@ POWERUP_DURATION = 8.0
 POWERUP_CHANCE = 0.005            # chance each frame that a powerup appears
 ANGLE_INFLUENCE = 5               # horizontal change from paddle impact
 PADDLE_VEL_INFLUENCE = 0.5        # fraction of paddle velocity transferred
-GRAVITY = 0.1                     # downward acceleration each frame
+GRAVITY = 0.01                     # downward acceleration each frame
 
 
 def cubic_bezier(t, p0, p1, p2, p3):
