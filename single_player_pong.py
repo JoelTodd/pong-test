@@ -80,7 +80,7 @@ def create_ball(up: bool = False, pos: tuple[int, int] | None = None) -> dict:
     else:
         rect.center = pos
     vx, vy = random_velocity(up)
-    ball = {"rect": rect, "vx": vx, "vy": vy, "id": next_ball_id}
+    ball = {"rect": rect, "vx": vx, "vy": vy, "ax": 0.0, "ay": 0.0, "id": next_ball_id}
     next_ball_id += 1
     return ball
 
@@ -136,6 +136,17 @@ def run_menu() -> None:
         pygame.display.flip()
         clock.tick(FPS)
 
+<<<<<<< HEAD
+=======
+# --- init
+pygame.init()
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Single-Player Pong")
+clock = pygame.time.Clock()
+font = pygame.font.SysFont(None, 32)
+debug_font = pygame.font.SysFont(None, 24)
+debug_mode = False
+>>>>>>> main
 
 def run_game_over(score: int) -> str:
     """Display a basic game over screen and return the user's choice."""
@@ -171,6 +182,7 @@ def run_game_over(score: int) -> str:
             (WIDTH // 2 - score_surf.get_width() // 2, HEIGHT // 2 - 40),
         )
 
+<<<<<<< HEAD
         for i, option in enumerate(options):
             color = "yellow" if i == selected else "white"
             surf = menu_font.render(option, True, color)
@@ -178,6 +190,14 @@ def run_game_over(score: int) -> str:
                 surf,
                 (WIDTH // 2 - surf.get_width() // 2, HEIGHT // 2 + i * 40),
             )
+=======
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_m:
+            debug_mode = not debug_mode
+>>>>>>> main
 
         pygame.display.flip()
         clock.tick(FPS)
@@ -205,10 +225,23 @@ def run_game() -> int:
     while True:
         dt = clock.tick(FPS) / 1000.0
 
+<<<<<<< HEAD
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+=======
+    # update balls
+    for b in balls[:]:
+        rect = b["rect"]
+        old_center = rect.center
+        prev_vx = b["vx"]
+        prev_vy = b["vy"]
+        b["vy"] += GRAVITY
+        rect.x += b["vx"]
+        rect.y += b["vy"]
+        new_center = rect.center
+>>>>>>> main
 
         # input
         keys = pygame.key.get_pressed()
@@ -279,6 +312,7 @@ def run_game() -> int:
                             b["vx"] = int(round(math.cos(angle) * speed))
                             b["vy"] = int(round(math.sin(angle) * speed))
 
+<<<<<<< HEAD
                     if rect.colliderect(paddle) and b["vy"] > 0:
                         offset = (rect.centerx - paddle.centerx) / (PADDLE_WIDTH / 2)
                         b["vy"] *= -1
@@ -286,6 +320,17 @@ def run_game() -> int:
                         b["vx"] = max(min(b["vx"] * SPEED_INCREMENT, MAX_BALL_SPEED), -MAX_BALL_SPEED)
                         b["vy"] = max(min(b["vy"] * SPEED_INCREMENT, MAX_BALL_SPEED), -MAX_BALL_SPEED)
                         score += 1
+=======
+        if dt > 0:
+            b["ax"] = (b["vx"] - prev_vx) / dt
+            b["ay"] = (b["vy"] - prev_vy) / dt
+        else:
+            b["ax"] = 0.0
+            b["ay"] = 0.0
+
+        if rect.top > HEIGHT:
+            balls.remove(b)
+>>>>>>> main
 
                     if rect.top > HEIGHT:
                         balls.remove(b)
@@ -311,6 +356,7 @@ def run_game() -> int:
                         b["vx"] = int(round(math.cos(angle) * speed))
                         b["vy"] = int(round(math.sin(angle) * speed))
 
+<<<<<<< HEAD
                 if rect.colliderect(paddle) and b["vy"] > 0:
                     offset = (rect.centerx - paddle.centerx) / (PADDLE_WIDTH / 2)
                     b["vy"] *= -1
@@ -358,3 +404,20 @@ if __name__ == "__main__":
     clock = pygame.time.Clock()
     font = pygame.font.SysFont(None, 32)
     main()
+=======
+    if debug_mode:
+        lines = [f"Balls: {len(balls)}"]
+        for b in balls:
+            speed = math.hypot(b["vx"], b["vy"])
+            accel = math.hypot(b.get("ax", 0.0), b.get("ay", 0.0))
+            lines.append(
+                f"id {b['id']} spd {speed:.2f} acc {accel:.2f}"
+            )
+        y = 10
+        for line in lines:
+            surf = debug_font.render(line, True, "green")
+            screen.blit(surf, (10, y))
+            y += surf.get_height() + 2
+
+    pygame.display.flip()
+>>>>>>> main
