@@ -12,14 +12,20 @@ scrolls vertically with your paddle at the bottom of the screen.
 
 ## Installation
 
-1. **Clone this repository** or download `single_player_pong.py` to your computer.
+1. **Clone this repository** or download the project files to your computer.
 2. Install Pygame using pip:
 
    ```bash
    pip install pygame
    ```
 
-Run the script and a small menu will appear. Use the arrow keys to select
+Run the game with:
+
+```bash
+python main.py
+```
+
+A small menu will appear. Use the arrow keys to select
 "Start Game" or "Quit" and press Enter to confirm.
 
 The ball now speeds up whenever it bounces off the top wall or your paddle, leading to a
