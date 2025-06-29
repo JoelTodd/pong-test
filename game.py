@@ -27,9 +27,9 @@ def run_game(screen, clock, font, debug_font) -> int:
     powerup = None           # there may or may not be a powerup present
     score = 0
 
-    paddle_vx = 0           # current horizontal velocity
-    paddle_target_vx = 0    # desired velocity based on input
-    paddle_start_vx = 0     # velocity at the start of a transition
+    paddle_vx: float = 0.0           # current horizontal velocity
+    paddle_target_vx: float = 0.0    # desired velocity based on input
+    paddle_start_vx: float = 0.0     # velocity at the start of a transition
     transition_t = 1.0      # progress of velocity transition
 
     while True:
@@ -69,7 +69,7 @@ def run_game(screen, clock, font, debug_font) -> int:
             paddle_vx = paddle_target_vx
 
         # Move the paddle and keep it on screen
-        paddle.x += paddle_vx
+        paddle.x = int(paddle.x + paddle_vx)
         paddle.clamp_ip(pygame.Rect(0, 0, Screen.WIDTH, Screen.HEIGHT))
 
         # Randomly spawn a powerup
