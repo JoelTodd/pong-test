@@ -1,9 +1,14 @@
 # Single Player Pong
 
-A simple single-player Pong game built in Python using Pygame. The action now
-scrolls vertically with your paddle at the bottom of the screen.
+Single Player Pong is a vertical-scrolling twist on the classic arcade game. Built with Python and Pygame, it challenges you to keep one or more balls in play using a paddle at the bottom of the screen.
 
 ![Screenshot](Screenshot%202025-06-26%20212716.png)
+
+## Features
+
+- Balls speed up after bouncing off the top wall or your paddle
+- Yellow power-ups briefly appear and duplicate any ball that passes through them
+- The game ends only when every ball is missed
 
 ## Requirements
 
@@ -12,27 +17,16 @@ scrolls vertically with your paddle at the bottom of the screen.
 
 ## Installation
 
-1. **Clone this repository** or download the project files to your computer.
-2. Install Pygame using pip:
+Clone the repository and install Pygame:
 
-   ```bash
-   pip install pygame
-   ```
+```bash
+pip install pygame
+```
 
-Run the game with:
+## Running the Game
 
 ```bash
 python main.py
 ```
 
-A small menu will appear. Use the arrow keys to select
-"Start Game" or "Quit" and press Enter to confirm.
-
-The ball now speeds up whenever it bounces off the top wall or your paddle, leading to a
-steady progression from a slow start to a fast, chaotic end. Keep an eye out for the yellow powerup
-that appears as a short, unmoving paddle. It sticks around for a few seconds
-and duplicates any ball that passes through it from above or below, launching
-the new copy in a random direction that keeps the same vertical motion and
-overall speed as the source ball while never travelling perfectly sideways. The
-game only resets
-when every ball has been missed.
+Use the arrow keys to move the paddle and to navigate the menu. Press Enter to confirm menu choices.
