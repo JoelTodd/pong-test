@@ -30,9 +30,15 @@ class DemoGame:
     def update(self, dt: float) -> None:
         """Advance the demo simulation by one frame."""
 
-        # Autopilot: track the ball but with slight randomness and timed arrival
+        # Autopilot: track whichever ball will hit the paddle next. A small
+        # random offset keeps the motion from looking too mechanical.
         if self.balls:
-            target_x, frames_left = self._predict_intercept(self.balls[0])
+            target_x = None
+            frames_left = None
+            for ball in self.balls:
+                tx, fl = self._predict_intercept(ball)
+                if frames_left is None or fl < frames_left:
+                    target_x, frames_left = tx, fl
             # Add a tiny offset each frame to avoid perfectly straight movement
             target_x += random.uniform(-2, 2)
 
