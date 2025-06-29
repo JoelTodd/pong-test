@@ -1,6 +1,6 @@
 import random
 import math
-from .constants import BALL_SPEED_X_RANGE, BALL_SPEED_Y_RANGE
+from constants import BALL_SPEED_X_RANGE, BALL_SPEED_Y_RANGE
 
 def cubic_bezier(t, p0, p1, p2, p3):
     return (

@@ -3,7 +3,7 @@ import sys
 import random
 import math
 
-from .constants import (
+from constants import (
     WIDTH,
     HEIGHT,
     FPS,
@@ -18,8 +18,8 @@ from .constants import (
     SPEED_INCREMENT,
     MAX_BALL_SPEED,
 )
-from .utils import snappy_ease, duplicate_velocity
-from .entities import create_ball, spawn_powerup
+from utils import snappy_ease, duplicate_velocity
+from entities import create_ball, spawn_powerup
 
 
 def run_game(screen, clock, font, debug_font) -> int:

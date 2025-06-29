@@ -1,6 +1,6 @@
 import pygame
 import sys
-from .constants import WIDTH, HEIGHT, FPS
+from constants import WIDTH, HEIGHT, FPS
 
 
 def run_menu(screen, clock) -> None:

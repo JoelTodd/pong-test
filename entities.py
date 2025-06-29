@@ -1,7 +1,7 @@
 import random
 import pygame
-from .constants import WIDTH, HEIGHT, BALL_SIZE, POWERUP_WIDTH, POWERUP_HEIGHT, POWERUP_DURATION
-from .utils import random_velocity
+from constants import WIDTH, HEIGHT, BALL_SIZE, POWERUP_WIDTH, POWERUP_HEIGHT, POWERUP_DURATION
+from utils import random_velocity
 
 _next_ball_id = 0
 
