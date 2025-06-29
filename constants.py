@@ -26,7 +26,7 @@ class Ball:
     SPEED_X_RANGE = (-3, 3)
     SPEED_Y_RANGE = (3, 5)
     SPEED_INCREMENT = 1.05
-    MAX_SPEED = 50
+    MAX_SPEED = 15
     ANGLE_INFLUENCE = 5
     GRAVITY = 0.02
 

@@ -3,6 +3,7 @@
 import pygame
 import sys
 from constants import Screen
+from demo import DemoGame
 
 
 def run_menu(screen, clock) -> None:
@@ -13,8 +14,11 @@ def run_menu(screen, clock) -> None:
 
     title_font = pygame.font.SysFont(None, 48)
     menu_font = pygame.font.SysFont(None, 32)
+    demo = DemoGame()
+    demo_surface = pygame.Surface((Screen.WIDTH, Screen.HEIGHT), pygame.SRCALPHA)
 
     while True:
+        dt = clock.tick(Screen.FPS) / 1000.0
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit(); sys.exit()
@@ -30,7 +34,12 @@ def run_menu(screen, clock) -> None:
                         return
                     pygame.quit(); sys.exit()
 
+        demo.update(dt)
         screen.fill("black")
+        demo_surface.fill((0, 0, 0, 0))
+        demo.draw(demo_surface)
+        demo_surface.set_alpha(128)
+        screen.blit(demo_surface, (0, 0))
         title = title_font.render("Single-Player Pong", True, "white")
         screen.blit(title, (Screen.WIDTH//2 - title.get_width()//2, Screen.HEIGHT//3 - 50))
 
@@ -40,7 +49,6 @@ def run_menu(screen, clock) -> None:
             screen.blit(surf, (Screen.WIDTH//2 - surf.get_width()//2, Screen.HEIGHT//2 + i*40))
 
         pygame.display.flip()
-        clock.tick(Screen.FPS)
 
 
 def run_game_over(screen, clock, score: int) -> str:
@@ -52,6 +60,7 @@ def run_game_over(screen, clock, score: int) -> str:
     menu_font = pygame.font.SysFont(None, 32)
 
     while True:
+        dt = clock.tick(Screen.FPS) / 1000.0
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit(); sys.exit()
@@ -78,4 +87,3 @@ def run_game_over(screen, clock, score: int) -> str:
             screen.blit(surf, (Screen.WIDTH//2 - surf.get_width()//2, Screen.HEIGHT//2 + i*40))
 
         pygame.display.flip()
-        clock.tick(Screen.FPS)
