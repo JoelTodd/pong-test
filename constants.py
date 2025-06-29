@@ -22,13 +22,13 @@ class Paddle:
 class Ball:
     """Ball size and physics related constants."""
 
-    SIZE = 12
-    SPEED_X_RANGE = (-4, 4)
-    SPEED_Y_RANGE = (4, 6)
-    SPEED_INCREMENT = 1.08
+    SIZE = 10
+    SPEED_X_RANGE = (-3, 3)
+    SPEED_Y_RANGE = (3, 5)
+    SPEED_INCREMENT = 1.05
     MAX_SPEED = 15
     ANGLE_INFLUENCE = 5
-    GRAVITY = 0.01
+    GRAVITY = 0.02
 
 
 class Powerup:

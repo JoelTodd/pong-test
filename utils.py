@@ -20,21 +20,21 @@ def snappy_ease(t: float) -> float:
     return cubic_bezier(t, 0.0, 0.1, 0.9, 1.0)
 
 
-def random_velocity(up: bool = False) -> tuple[int, int]:
+def random_velocity(up: bool = False) -> tuple[float, float]:
     """Return a random starting velocity for a ball."""
 
     # Choose a horizontal component first. "range" is inclusive/exclusive
     # so we convert it to a list before picking a value.
-    vx = random.choice(list(range(*Ball.SPEED_X_RANGE)))
+    vx = float(random.choice(list(range(*Ball.SPEED_X_RANGE))))
 
     # Vertical speed is always positive; we flip it if the ball should move up.
-    vy = random.choice(range(*Ball.SPEED_Y_RANGE))
+    vy = float(random.choice(range(*Ball.SPEED_Y_RANGE)))
     if up:
         vy *= -1
     return vx, vy
 
 
-def duplicate_velocity(vx_current: int, vy_current: int) -> tuple[int, int]:
+def duplicate_velocity(vx_current: float, vy_current: float) -> tuple[float, float]:
     """Same speed, different direction (avoid perfectly horizontal)."""
 
     speed = math.hypot(vx_current, vy_current)
@@ -51,4 +51,4 @@ def duplicate_velocity(vx_current: int, vy_current: int) -> tuple[int, int]:
         vy = speed * math.sin(ang)
         if vy_current < 0:
             vy *= -1
-        return int(round(vx)), int(round(vy))
+        return vx, vy

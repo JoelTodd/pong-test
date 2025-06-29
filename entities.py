@@ -23,7 +23,16 @@ def create_ball(up: bool = False, pos: tuple[int, int] | None = None) -> dict:
     vx, vy = random_velocity(up)
 
     # Store additional fields used for debugging/physics
-    ball = {"rect": rect, "vx": vx, "vy": vy, "ax": 0.0, "ay": 0.0, "id": _next_ball_id}
+    ball = {
+        "rect": rect,
+        "x": float(rect.x),
+        "y": float(rect.y),
+        "vx": vx,
+        "vy": vy,
+        "ax": 0.0,
+        "ay": 0.0,
+        "id": _next_ball_id,
+    }
     _next_ball_id += 1
     return ball
 
