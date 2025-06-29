@@ -1,6 +1,7 @@
 # Simple autoplay demonstration used for background animations in menus.
 
 import random
+import math
 import pygame
 
 from constants import Screen, Paddle, Ball, Powerup
@@ -22,18 +23,23 @@ class DemoGame:
             Paddle.HEIGHT,
         )
         self._paddle_center = float(self.paddle.centerx)
+        self.paddle_vx = 0
         self.balls = [create_ball()]  # start with a single ball
         self.powerup = None
 
     def update(self, dt: float) -> None:
-        """Advance the demo simulation by ``dt`` seconds."""
-        # Autopilot: smoothly move the paddle toward the first ball
+        """Advance the demo simulation by one frame."""
+
+        # Autopilot: move at a constant speed toward where the ball will land
         if self.balls:
-            target = self.balls[0]["rect"].centerx
-            diff = target - self._paddle_center
-            step = diff * 10.0 * dt
-            step = max(-Paddle.SPEED, min(Paddle.SPEED, step))
-            self._paddle_center += step
+            target_x = self._predict_target(self.balls[0])
+            if abs(target_x - self._paddle_center) <= Paddle.SPEED:
+                self._paddle_center = target_x
+                self.paddle_vx = 0
+            else:
+                direction = 1 if target_x > self._paddle_center else -1
+                self.paddle_vx = direction * Paddle.SPEED
+                self._paddle_center += self.paddle_vx
             self.paddle.centerx = int(round(self._paddle_center))
             self.paddle.clamp_ip(pygame.Rect(0, 0, Screen.WIDTH, Screen.HEIGHT))
 
@@ -43,6 +49,7 @@ class DemoGame:
 
         for b in self.balls[:]:
             rect = b["rect"]
+
             b["vy"] += Ball.GRAVITY
             rect.x += b["vx"]
             rect.y += b["vy"]
@@ -51,12 +58,20 @@ class DemoGame:
                 b["vx"] *= -1
             if rect.top <= 0:
                 b["vy"] *= -1
+                speed = math.hypot(b["vx"], b["vy"])
+                if speed < Ball.MAX_SPEED:
+                    speed = min(speed * Ball.SPEED_INCREMENT, Ball.MAX_SPEED)
+                    angle = math.atan2(b["vy"], b["vx"])
+                    b["vx"] = int(round(math.cos(angle) * speed))
+                    b["vy"] = int(round(math.sin(angle) * speed))
 
             # Bounce off the paddle
             if rect.colliderect(self.paddle) and b["vy"] > 0:
                 offset = (rect.centerx - self.paddle.centerx) / (Paddle.WIDTH / 2)
                 b["vy"] *= -1
-                b["vx"] += offset * Ball.ANGLE_INFLUENCE
+                b["vx"] += offset * Ball.ANGLE_INFLUENCE + self.paddle_vx * Paddle.VEL_INFLUENCE
+                b["vx"] = max(min(b["vx"] * Ball.SPEED_INCREMENT, Ball.MAX_SPEED), -Ball.MAX_SPEED)
+                b["vy"] = max(min(b["vy"] * Ball.SPEED_INCREMENT, Ball.MAX_SPEED), -Ball.MAX_SPEED)
 
             # Handle powerup
             if self.powerup:
@@ -88,4 +103,30 @@ class DemoGame:
             pygame.draw.ellipse(surface, "white", b["rect"])
         if self.powerup:
             pygame.draw.rect(surface, "yellow", self.powerup["rect"])
+
+    def _predict_target(self, ball: dict) -> float:
+        """Return the x-coordinate where ``ball`` will reach the paddle height."""
+        rect = ball["rect"].copy()
+        vx, vy = ball["vx"], ball["vy"]
+
+        for _ in range(2000):
+            rect.x += vx
+            rect.y += vy
+            vy += Ball.GRAVITY
+
+            if rect.left <= 0 or rect.right >= Screen.WIDTH:
+                vx *= -1
+            if rect.top <= 0:
+                vy *= -1
+                speed = math.hypot(vx, vy)
+                if speed < Ball.MAX_SPEED:
+                    speed = min(speed * Ball.SPEED_INCREMENT, Ball.MAX_SPEED)
+                    angle = math.atan2(vy, vx)
+                    vx = int(round(math.cos(angle) * speed))
+                    vy = int(round(math.sin(angle) * speed))
+
+            if rect.bottom >= self.paddle.top:
+                return rect.centerx
+
+        return rect.centerx
 
