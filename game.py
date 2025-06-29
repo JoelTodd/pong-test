@@ -78,10 +78,12 @@ def run_game(screen, clock, font, debug_font) -> int:
             rect = b["rect"]
             prev_vx, prev_vy = b["vx"], b["vy"]
 
-            # Apply gravity then update position
+            # Apply gravity then update position using sub-pixel accuracy
             b["vy"] += Ball.GRAVITY
-            rect.x += b["vx"]
-            rect.y += b["vy"]
+            b["x"] += b["vx"]
+            b["y"] += b["vy"]
+            rect.x = round(b["x"])
+            rect.y = round(b["y"])
 
             # Bounce off the side walls
             if rect.left <= 0 or rect.right >= Screen.WIDTH:
@@ -93,8 +95,8 @@ def run_game(screen, clock, font, debug_font) -> int:
                 if speed < Ball.MAX_SPEED:
                     speed = min(speed * Ball.SPEED_INCREMENT, Ball.MAX_SPEED)
                     angle = math.atan2(b["vy"], b["vx"])
-                    b["vx"] = int(round(math.cos(angle) * speed))
-                    b["vy"] = int(round(math.sin(angle) * speed))
+                    b["vx"] = math.cos(angle) * speed
+                    b["vy"] = math.sin(angle) * speed
 
             # Bounce off the paddle and angle the ball based on where it hits
             if rect.colliderect(paddle) and b["vy"] > 0:
