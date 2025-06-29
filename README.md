@@ -30,3 +30,5 @@ python main.py
 ```
 
 Use the arrow keys to move the paddle and to navigate the menu. Press Enter to confirm menu choices.
+
+The game no longer caps the frame rate. All physics and timing scale with the actual frame time, so gameplay feels the same regardless of performance.

@@ -18,7 +18,7 @@ def run_menu(screen, clock) -> None:
     demo_surface = pygame.Surface((Screen.WIDTH, Screen.HEIGHT), pygame.SRCALPHA)
 
     while True:
-        dt = clock.tick() / 1000.0
+        dt = max(clock.tick(), 1) / 1000.0
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit(); sys.exit()
@@ -60,7 +60,7 @@ def run_game_over(screen, clock, score: int) -> str:
     menu_font = pygame.font.SysFont(None, 32)
 
     while True:
-        dt = clock.tick() / 1000.0
+        dt = max(clock.tick(), 1) / 1000.0
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit(); sys.exit()

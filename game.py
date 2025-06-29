@@ -22,6 +22,7 @@ def run_game(screen, clock, font, debug_font) -> int:
         Paddle.WIDTH,
         Paddle.HEIGHT,
     )
+    paddle_x = float(paddle.x)
 
     balls = [create_ball()]  # list of active balls on the screen
     powerup = None           # there may or may not be a powerup present
@@ -36,7 +37,7 @@ def run_game(screen, clock, font, debug_font) -> int:
         # ``dt`` is the time (in seconds) since the last loop iteration
         # ``dt`` is the time (in seconds) since the last loop iteration. We no
         # longer cap the frame rate, so ``dt`` may vary from frame to frame.
-        dt = clock.tick() / 1000.0
+        dt = max(clock.tick(), 1) / 1000.0
         dt_scaled = dt * Screen.FPS  # scale factor relative to the old 60 FPS
 
         # Handle window events and toggle debug mode with the M key
@@ -70,9 +71,11 @@ def run_game(screen, clock, font, debug_font) -> int:
         else:
             paddle_vx = paddle_target_vx
 
-        # Move the paddle and keep it on screen
-        paddle.x += paddle_vx * dt_scaled
+        # Move the paddle and keep it on screen using sub-pixel precision
+        paddle_x += paddle_vx * dt_scaled
+        paddle.x = round(paddle_x)
         paddle.clamp_ip(pygame.Rect(0, 0, Screen.WIDTH, Screen.HEIGHT))
+        paddle_x = float(paddle.x)
 
         # Randomly spawn a powerup
         if powerup is None and random.random() < Powerup.CHANCE * dt_scaled:

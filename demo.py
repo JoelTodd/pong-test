@@ -30,6 +30,8 @@ class DemoGame:
     def update(self, dt: float) -> None:
         """Advance the demo simulation by one frame."""
         dt_scaled = dt * Screen.FPS
+        if dt_scaled == 0:
+            dt_scaled = 1e-8
 
         # Autopilot: track whichever ball will hit the paddle next. A small
         # random offset keeps the motion from looking too mechanical.
@@ -45,9 +47,12 @@ class DemoGame:
 
             # Determine when we need to start moving so we reach the target
             dist = abs(target_x - self._paddle_center)
-            move_frames = math.ceil(dist / Paddle.SPEED)
+            move_frames = math.ceil(dist / (Paddle.SPEED * dt_scaled))
             # Aim to arrive a handful of frames before impact
-            start_moving = frames_left <= move_frames + 3
+            if dt_scaled > 0:
+                start_moving = frames_left / dt_scaled <= move_frames + 3
+            else:
+                start_moving = False
 
             if start_moving:
                 if dist <= Paddle.SPEED:
