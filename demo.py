@@ -23,9 +23,9 @@ class DemoGame:
             Paddle.HEIGHT,
         )
         self._paddle_center = float(self.paddle.centerx)
-        self.paddle_vx = 0
+        self.paddle_vx: float = 0.0
         self.balls = [create_ball()]  # start with a single ball
-        self.powerup = None
+        self.powerup: dict | None = None
 
     def update(self, dt: float) -> None:
         """Advance the demo simulation by one frame."""
@@ -33,12 +33,13 @@ class DemoGame:
         # Autopilot: track whichever ball will hit the paddle next. A small
         # random offset keeps the motion from looking too mechanical.
         if self.balls:
-            target_x = None
-            frames_left = None
+            target_x: float | None = None
+            frames_left: int | None = None
             for ball in self.balls:
                 tx, fl = self._predict_intercept(ball)
                 if frames_left is None or fl < frames_left:
                     target_x, frames_left = tx, fl
+            assert target_x is not None and frames_left is not None
             # Add a tiny offset each frame to avoid perfectly straight movement
             target_x += random.uniform(-2, 2)
 
