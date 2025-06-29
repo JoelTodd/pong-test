@@ -63,8 +63,9 @@ class DemoGame:
                 self.paddle_vx = 0
 
             self.paddle.centerx = int(round(self._paddle_center))
-            bounds = pygame.Rect(0, 0, Screen.WIDTH, Screen.HEIGHT)
-            self.paddle.clamp_ip(bounds)
+            self.paddle.clamp_ip(
+                pygame.Rect(0, 0, Screen.WIDTH, Screen.HEIGHT)
+            )
 
         # Occasionally spawn a powerup
         if self.powerup is None and random.random() < Powerup.CHANCE:
@@ -111,9 +112,10 @@ class DemoGame:
             if self.powerup:
                 p_rect = self.powerup["rect"]
                 ball_id = b["id"]
-                if p_rect.colliderect(rect) and ball_id not in self.powerup[
-                    "collided"
-                ]:
+                if (
+                    p_rect.colliderect(rect)
+                    and ball_id not in self.powerup["collided"]
+                ):
                     vx_new, vy_new = duplicate_velocity(b["vx"], b["vy"])
                     nb = create_ball(up=b["vy"] < 0, pos=rect.center)
                     nb["vx"], nb["vy"] = vx_new, vy_new

@@ -24,7 +24,8 @@ def main() -> None:
         # Play one round of the game and get the final score
         final_score = run_game(screen, clock, font, debug_font)
 
-        # When the player loses, display the game over screen and ask what to do
+        # When the player loses, display the game over screen
+        # and ask what to do
         choice = run_game_over(screen, clock, final_score)
         if choice == "retry":
             # Immediately start another round

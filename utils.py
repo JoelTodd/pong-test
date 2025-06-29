@@ -2,6 +2,7 @@ import random
 import math
 from constants import Ball
 
+
 def cubic_bezier(t, p0, p1, p2, p3):
     """Simple cubic Bézier curve used for easing."""
 
@@ -34,7 +35,9 @@ def random_velocity(up: bool = False) -> tuple[float, float]:
     return vx, vy
 
 
-def duplicate_velocity(vx_current: float, vy_current: float) -> tuple[float, float]:
+def duplicate_velocity(
+    vx_current: float, vy_current: float
+) -> tuple[float, float]:
     """Same speed, different direction (avoid perfectly horizontal)."""
 
     speed = math.hypot(vx_current, vy_current)
