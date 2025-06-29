@@ -1,3 +1,5 @@
+"""Program entry point for the single-player Pong game."""
+
 import pygame
 from constants import WIDTH, HEIGHT
 from menus import run_menu, run_game_over
@@ -5,19 +7,29 @@ from game import run_game
 
 
 def main() -> None:
+    """Set up Pygame and run the high level game loops."""
+
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("Single-Player Pong")
     clock = pygame.time.Clock()
+
+    # Pre-create fonts so we don't recreate them every frame
     font = pygame.font.SysFont(None, 32)
     debug_font = pygame.font.SysFont(None, 24)
 
+    # Show the menu screen first
     run_menu(screen, clock)
     while True:
+        # Play one round of the game and get the final score
         final_score = run_game(screen, clock, font, debug_font)
+
+        # When the player loses, display the game over screen and ask what to do
         choice = run_game_over(screen, clock, final_score)
         if choice == "retry":
+            # Immediately start another round
             continue
+        # Otherwise return to the main menu
         run_menu(screen, clock)
 
 
