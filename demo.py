@@ -41,12 +41,14 @@ class DemoGame:
                     target_x, frames_left = tx, fl
             assert target_x is not None and frames_left is not None
             # Add a tiny offset each frame to avoid perfectly straight movement
+            assert target_x is not None
             target_x += random.uniform(-2, 2)
 
             # Determine when we need to start moving so we reach the target
             dist = abs(target_x - self._paddle_center)
             move_frames = math.ceil(dist / Paddle.SPEED)
             # Aim to arrive a handful of frames before impact
+            assert frames_left is not None
             start_moving = frames_left <= move_frames + 3
 
             if start_moving:
@@ -61,7 +63,8 @@ class DemoGame:
                 self.paddle_vx = 0
 
             self.paddle.centerx = int(round(self._paddle_center))
-            self.paddle.clamp_ip(pygame.Rect(0, 0, Screen.WIDTH, Screen.HEIGHT))
+            bounds = pygame.Rect(0, 0, Screen.WIDTH, Screen.HEIGHT)
+            self.paddle.clamp_ip(bounds)
 
         # Occasionally spawn a powerup
         if self.powerup is None and random.random() < Powerup.CHANCE:
@@ -87,17 +90,30 @@ class DemoGame:
 
             # Bounce off the paddle
             if rect.colliderect(self.paddle) and b["vy"] > 0:
-                offset = (rect.centerx - self.paddle.centerx) / (Paddle.WIDTH / 2)
+                offset = (
+                    rect.centerx - self.paddle.centerx
+                ) / (Paddle.WIDTH / 2)
                 b["vy"] *= -1
-                b["vx"] += offset * Ball.ANGLE_INFLUENCE + self.paddle_vx * Paddle.VEL_INFLUENCE
-                b["vx"] = max(min(b["vx"] * Ball.SPEED_INCREMENT, Ball.MAX_SPEED), -Ball.MAX_SPEED)
-                b["vy"] = max(min(b["vy"] * Ball.SPEED_INCREMENT, Ball.MAX_SPEED), -Ball.MAX_SPEED)
+                b["vx"] += (
+                    offset * Ball.ANGLE_INFLUENCE
+                    + self.paddle_vx * Paddle.VEL_INFLUENCE
+                )
+                b["vx"] = max(
+                    min(b["vx"] * Ball.SPEED_INCREMENT, Ball.MAX_SPEED),
+                    -Ball.MAX_SPEED,
+                )
+                b["vy"] = max(
+                    min(b["vy"] * Ball.SPEED_INCREMENT, Ball.MAX_SPEED),
+                    -Ball.MAX_SPEED,
+                )
 
             # Handle powerup
             if self.powerup:
                 p_rect = self.powerup["rect"]
                 ball_id = b["id"]
-                if p_rect.colliderect(rect) and ball_id not in self.powerup["collided"]:
+                if p_rect.colliderect(rect) and ball_id not in self.powerup[
+                    "collided"
+                ]:
                     vx_new, vy_new = duplicate_velocity(b["vx"], b["vy"])
                     nb = create_ball(up=b["vy"] < 0, pos=rect.center)
                     nb["vx"], nb["vy"] = vx_new, vy_new
@@ -149,4 +165,3 @@ class DemoGame:
                 return rect.centerx, frame
 
         return rect.centerx, 2000
-
