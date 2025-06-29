@@ -21,19 +21,21 @@ class DemoGame:
             Paddle.WIDTH,
             Paddle.HEIGHT,
         )
+        self._paddle_center = float(self.paddle.centerx)
         self.balls = [create_ball()]  # start with a single ball
         self.powerup = None
 
     def update(self, dt: float) -> None:
         """Advance the demo simulation by ``dt`` seconds."""
-        # Autopilot: move the paddle toward the first ball
+        # Autopilot: smoothly move the paddle toward the first ball
         if self.balls:
             target = self.balls[0]["rect"].centerx
-            if target < self.paddle.centerx - Paddle.SPEED:
-                self.paddle.x -= Paddle.SPEED
-            elif target > self.paddle.centerx + Paddle.SPEED:
-                self.paddle.x += Paddle.SPEED
-        self.paddle.clamp_ip(pygame.Rect(0, 0, Screen.WIDTH, Screen.HEIGHT))
+            diff = target - self._paddle_center
+            step = diff * 10.0 * dt
+            step = max(-Paddle.SPEED, min(Paddle.SPEED, step))
+            self._paddle_center += step
+            self.paddle.centerx = int(round(self._paddle_center))
+            self.paddle.clamp_ip(pygame.Rect(0, 0, Screen.WIDTH, Screen.HEIGHT))
 
         # Occasionally spawn a powerup
         if self.powerup is None and random.random() < Powerup.CHANCE:
