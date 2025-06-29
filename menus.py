@@ -58,8 +58,6 @@ def run_game_over(screen, clock, score: int) -> str:
     selected = 0
     title_font = pygame.font.SysFont(None, 48)
     menu_font = pygame.font.SysFont(None, 32)
-    demo = DemoGame()
-    demo_surface = pygame.Surface((Screen.WIDTH, Screen.HEIGHT), pygame.SRCALPHA)
 
     while True:
         dt = clock.tick(Screen.FPS) / 1000.0
@@ -76,12 +74,7 @@ def run_game_over(screen, clock, score: int) -> str:
                 elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
                     return "retry" if selected == 0 else "menu"
 
-        demo.update(dt)
         screen.fill("black")
-        demo_surface.fill((0, 0, 0, 0))
-        demo.draw(demo_surface)
-        demo_surface.set_alpha(128)
-        screen.blit(demo_surface, (0, 0))
         title = title_font.render("Game Over", True, "white")
         screen.blit(title, (Screen.WIDTH//2 - title.get_width()//2, Screen.HEIGHT//3 - 50))
 
