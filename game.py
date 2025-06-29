@@ -34,7 +34,10 @@ def run_game(screen, clock, font, debug_font) -> int:
 
     while True:
         # ``dt`` is the time (in seconds) since the last loop iteration
-        dt = clock.tick(Screen.FPS) / 1000.0
+        # ``dt`` is the time (in seconds) since the last loop iteration. We no
+        # longer cap the frame rate, so ``dt`` may vary from frame to frame.
+        dt = clock.tick() / 1000.0
+        dt_scaled = dt * Screen.FPS  # scale factor relative to the old 60 FPS
 
         # Handle window events and toggle debug mode with the M key
         for event in pygame.event.get():
@@ -59,18 +62,20 @@ def run_game(screen, clock, font, debug_font) -> int:
 
         # Interpolate towards the target velocity using easing
         if transition_t < 1.0:
-            transition_t = min(transition_t + Paddle.TRANSITION_RATE * dt, 1.0)
+            transition_t = min(
+                transition_t + Paddle.TRANSITION_RATE * dt, 1.0
+            )
             prog = snappy_ease(transition_t)
             paddle_vx = paddle_start_vx + (paddle_target_vx - paddle_start_vx) * prog
         else:
             paddle_vx = paddle_target_vx
 
         # Move the paddle and keep it on screen
-        paddle.x += paddle_vx
+        paddle.x += paddle_vx * dt_scaled
         paddle.clamp_ip(pygame.Rect(0, 0, Screen.WIDTH, Screen.HEIGHT))
 
         # Randomly spawn a powerup
-        if powerup is None and random.random() < Powerup.CHANCE:
+        if powerup is None and random.random() < Powerup.CHANCE * dt_scaled:
             powerup = spawn_powerup()
 
         # Update all balls
@@ -79,9 +84,9 @@ def run_game(screen, clock, font, debug_font) -> int:
             prev_vx, prev_vy = b["vx"], b["vy"]
 
             # Apply gravity then update position using sub-pixel accuracy
-            b["vy"] += Ball.GRAVITY
-            b["x"] += b["vx"]
-            b["y"] += b["vy"]
+            b["vy"] += Ball.GRAVITY * dt_scaled
+            b["x"] += b["vx"] * dt_scaled
+            b["y"] += b["vy"] * dt_scaled
             rect.x = round(b["x"])
             rect.y = round(b["y"])
 

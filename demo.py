@@ -29,6 +29,7 @@ class DemoGame:
 
     def update(self, dt: float) -> None:
         """Advance the demo simulation by one frame."""
+        dt_scaled = dt * Screen.FPS
 
         # Autopilot: track whichever ball will hit the paddle next. A small
         # random offset keeps the motion from looking too mechanical.
@@ -55,7 +56,7 @@ class DemoGame:
                 else:
                     direction = 1 if target_x > self._paddle_center else -1
                     self.paddle_vx = direction * Paddle.SPEED
-                    self._paddle_center += self.paddle_vx
+                    self._paddle_center += self.paddle_vx * dt_scaled
             else:
                 self.paddle_vx = 0
 
@@ -63,15 +64,15 @@ class DemoGame:
             self.paddle.clamp_ip(pygame.Rect(0, 0, Screen.WIDTH, Screen.HEIGHT))
 
         # Occasionally spawn a powerup
-        if self.powerup is None and random.random() < Powerup.CHANCE:
+        if self.powerup is None and random.random() < Powerup.CHANCE * dt_scaled:
             self.powerup = spawn_powerup()
 
         for b in self.balls[:]:
             rect = b["rect"]
 
-            b["vy"] += Ball.GRAVITY
-            rect.x += b["vx"]
-            rect.y += b["vy"]
+            b["vy"] += Ball.GRAVITY * dt_scaled
+            rect.x += b["vx"] * dt_scaled
+            rect.y += b["vy"] * dt_scaled
 
             if rect.left <= 0 or rect.right >= Screen.WIDTH:
                 b["vx"] *= -1
