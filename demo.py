@@ -41,12 +41,14 @@ class DemoGame:
                     target_x, frames_left = tx, fl
             assert target_x is not None and frames_left is not None
             # Add a tiny offset each frame to avoid perfectly straight movement
+            assert target_x is not None
             target_x += random.uniform(-2, 2)
 
             # Determine when we need to start moving so we reach the target
             dist = abs(target_x - self._paddle_center)
             move_frames = math.ceil(dist / Paddle.SPEED)
             # Aim to arrive a handful of frames before impact
+            assert frames_left is not None
             start_moving = frames_left <= move_frames + 3
 
             if start_moving:
