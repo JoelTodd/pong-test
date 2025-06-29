@@ -30,16 +30,29 @@ class DemoGame:
     def update(self, dt: float) -> None:
         """Advance the demo simulation by one frame."""
 
-        # Autopilot: move at a constant speed toward where the ball will land
+        # Autopilot: track the ball but with slight randomness and timed arrival
         if self.balls:
-            target_x = self._predict_target(self.balls[0])
-            if abs(target_x - self._paddle_center) <= Paddle.SPEED:
-                self._paddle_center = target_x
-                self.paddle_vx = 0
+            target_x, frames_left = self._predict_intercept(self.balls[0])
+            # Add a tiny offset each frame to avoid perfectly straight movement
+            target_x += random.uniform(-2, 2)
+
+            # Determine when we need to start moving so we reach the target
+            dist = abs(target_x - self._paddle_center)
+            move_frames = math.ceil(dist / Paddle.SPEED)
+            # Aim to arrive a handful of frames before impact
+            start_moving = frames_left <= move_frames + 3
+
+            if start_moving:
+                if dist <= Paddle.SPEED:
+                    self._paddle_center = target_x
+                    self.paddle_vx = 0
+                else:
+                    direction = 1 if target_x > self._paddle_center else -1
+                    self.paddle_vx = direction * Paddle.SPEED
+                    self._paddle_center += self.paddle_vx
             else:
-                direction = 1 if target_x > self._paddle_center else -1
-                self.paddle_vx = direction * Paddle.SPEED
-                self._paddle_center += self.paddle_vx
+                self.paddle_vx = 0
+
             self.paddle.centerx = int(round(self._paddle_center))
             self.paddle.clamp_ip(pygame.Rect(0, 0, Screen.WIDTH, Screen.HEIGHT))
 
@@ -104,12 +117,12 @@ class DemoGame:
         if self.powerup:
             pygame.draw.rect(surface, "yellow", self.powerup["rect"])
 
-    def _predict_target(self, ball: dict) -> float:
-        """Return the x-coordinate where ``ball`` will reach the paddle height."""
+    def _predict_intercept(self, ball: dict) -> tuple[float, int]:
+        """Return where and in how many frames ``ball`` will hit the paddle."""
         rect = ball["rect"].copy()
         vx, vy = ball["vx"], ball["vy"]
 
-        for _ in range(2000):
+        for frame in range(2000):
             rect.x += vx
             rect.y += vy
             vy += Ball.GRAVITY
@@ -126,7 +139,7 @@ class DemoGame:
                     vy = int(round(math.sin(angle) * speed))
 
             if rect.bottom >= self.paddle.top:
-                return rect.centerx
+                return rect.centerx, frame
 
-        return rect.centerx
+        return rect.centerx, 2000
 
