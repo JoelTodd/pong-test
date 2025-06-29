@@ -22,9 +22,9 @@ class DemoGame:
             Paddle.WIDTH,
             Paddle.HEIGHT,
         )
-        self._paddle_center: float = float(self.paddle.centerx)
-        self.paddle_vx: int = 0
-        self.balls: list[dict] = [create_ball()]  # start with a single ball
+        self._paddle_center = float(self.paddle.centerx)
+        self.paddle_vx: float = 0.0
+        self.balls = [create_ball()]  # start with a single ball
         self.powerup: dict | None = None
 
     def update(self, dt: float) -> None:
@@ -39,6 +39,7 @@ class DemoGame:
                 tx, fl = self._predict_intercept(ball)
                 if frames_left is None or fl < frames_left:
                     target_x, frames_left = tx, fl
+            assert target_x is not None and frames_left is not None
             # Add a tiny offset each frame to avoid perfectly straight movement
             assert target_x is not None
             target_x += random.uniform(-2, 2)
