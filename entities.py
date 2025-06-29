@@ -6,6 +6,7 @@ from utils import random_velocity
 # Internal counter used to assign a unique ID to each ball we create.
 _next_ball_id = 0
 
+
 def create_ball(up: bool = False, pos: tuple[int, int] | None = None) -> dict:
     """Return a new ball dictionary.
 
@@ -17,7 +18,10 @@ def create_ball(up: bool = False, pos: tuple[int, int] | None = None) -> dict:
 
     # Create the rectangular hitbox for the ball
     rect = pygame.Rect(0, 0, Ball.SIZE, Ball.SIZE)
-    rect.center = pos or (random.randint(40, Screen.WIDTH - 40), Screen.HEIGHT // 2)
+    rect.center = pos or (
+        random.randint(40, Screen.WIDTH - 40),
+        Screen.HEIGHT // 2,
+    )
 
     # Pick a starting velocity for the ball
     vx, vy = random_velocity(up)
@@ -45,5 +49,6 @@ def spawn_powerup() -> dict:
     y = random.randint(80, Screen.HEIGHT // 2)
     rect = pygame.Rect(x, y, Powerup.WIDTH, Powerup.HEIGHT)
 
-    # The ``collided`` set keeps track of balls already duplicated by this powerup
+    # The ``collided`` set keeps track of balls already duplicated by this
+    # powerup
     return {"rect": rect, "timer": Powerup.DURATION, "collided": set()}

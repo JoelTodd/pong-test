@@ -39,7 +39,8 @@ def run_game(screen, clock, font, debug_font) -> int:
         # Handle window events and toggle debug mode with the M key
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                pygame.quit(); sys.exit()
+                pygame.quit()
+                sys.exit()
             if event.type == pygame.KEYDOWN and event.key == pygame.K_m:
                 debug_mode = not debug_mode
 
@@ -61,7 +62,9 @@ def run_game(screen, clock, font, debug_font) -> int:
         if transition_t < 1.0:
             transition_t = min(transition_t + Paddle.TRANSITION_RATE * dt, 1.0)
             prog = snappy_ease(transition_t)
-            paddle_vx = paddle_start_vx + (paddle_target_vx - paddle_start_vx) * prog
+            paddle_vx = paddle_start_vx + (
+                paddle_target_vx - paddle_start_vx
+            ) * prog
         else:
             paddle_vx = paddle_target_vx
 
@@ -102,7 +105,10 @@ def run_game(screen, clock, font, debug_font) -> int:
             if rect.colliderect(paddle) and b["vy"] > 0:
                 offset = (rect.centerx - paddle.centerx) / (Paddle.WIDTH / 2)
                 b["vy"] *= -1
-                b["vx"] += offset * Ball.ANGLE_INFLUENCE + paddle_vx * Paddle.VEL_INFLUENCE
+                b["vx"] += (
+                    offset * Ball.ANGLE_INFLUENCE
+                    + paddle_vx * Paddle.VEL_INFLUENCE
+                )
                 b["vx"] = max(
                     min(b["vx"] * Ball.SPEED_INCREMENT, Ball.MAX_SPEED),
                     -Ball.MAX_SPEED,
@@ -117,7 +123,10 @@ def run_game(screen, clock, font, debug_font) -> int:
             if powerup:
                 p_rect = powerup["rect"]
                 ball_id = b["id"]
-                if p_rect.colliderect(rect) and ball_id not in powerup["collided"]:
+                if (
+                    p_rect.colliderect(rect)
+                    and ball_id not in powerup["collided"]
+                ):
                     # Duplicate the ball in a new random direction
                     vx_new, vy_new = duplicate_velocity(b["vx"], b["vy"])
                     nb = create_ball(up=b["vy"] < 0, pos=rect.center)
@@ -158,7 +167,9 @@ def run_game(screen, clock, font, debug_font) -> int:
 
         # Draw the current score in the top-right corner
         score_surf = font.render(f"Score: {score}", True, "white")
-        screen.blit(score_surf, (Screen.WIDTH - score_surf.get_width() - 10, 10))
+        screen.blit(
+            score_surf, (Screen.WIDTH - score_surf.get_width() - 10, 10)
+        )
 
         if debug_mode:
             # Display ball statistics on the left side of the screen
@@ -174,4 +185,3 @@ def run_game(screen, clock, font, debug_font) -> int:
                 y += surf.get_height() + 2
 
         pygame.display.flip()
-

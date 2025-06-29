@@ -60,7 +60,9 @@ class DemoGame:
                 self.paddle_vx = 0
 
             self.paddle.centerx = int(round(self._paddle_center))
-            self.paddle.clamp_ip(pygame.Rect(0, 0, Screen.WIDTH, Screen.HEIGHT))
+            self.paddle.clamp_ip(
+                pygame.Rect(0, 0, Screen.WIDTH, Screen.HEIGHT)
+            )
 
         # Occasionally spawn a powerup
         if self.powerup is None and random.random() < Powerup.CHANCE:
@@ -86,17 +88,31 @@ class DemoGame:
 
             # Bounce off the paddle
             if rect.colliderect(self.paddle) and b["vy"] > 0:
-                offset = (rect.centerx - self.paddle.centerx) / (Paddle.WIDTH / 2)
+                offset = (
+                    rect.centerx - self.paddle.centerx
+                ) / (Paddle.WIDTH / 2)
                 b["vy"] *= -1
-                b["vx"] += offset * Ball.ANGLE_INFLUENCE + self.paddle_vx * Paddle.VEL_INFLUENCE
-                b["vx"] = max(min(b["vx"] * Ball.SPEED_INCREMENT, Ball.MAX_SPEED), -Ball.MAX_SPEED)
-                b["vy"] = max(min(b["vy"] * Ball.SPEED_INCREMENT, Ball.MAX_SPEED), -Ball.MAX_SPEED)
+                b["vx"] += (
+                    offset * Ball.ANGLE_INFLUENCE
+                    + self.paddle_vx * Paddle.VEL_INFLUENCE
+                )
+                b["vx"] = max(
+                    min(b["vx"] * Ball.SPEED_INCREMENT, Ball.MAX_SPEED),
+                    -Ball.MAX_SPEED,
+                )
+                b["vy"] = max(
+                    min(b["vy"] * Ball.SPEED_INCREMENT, Ball.MAX_SPEED),
+                    -Ball.MAX_SPEED,
+                )
 
             # Handle powerup
             if self.powerup:
                 p_rect = self.powerup["rect"]
                 ball_id = b["id"]
-                if p_rect.colliderect(rect) and ball_id not in self.powerup["collided"]:
+                if (
+                    p_rect.colliderect(rect)
+                    and ball_id not in self.powerup["collided"]
+                ):
                     vx_new, vy_new = duplicate_velocity(b["vx"], b["vy"])
                     nb = create_ball(up=b["vy"] < 0, pos=rect.center)
                     nb["vx"], nb["vy"] = vx_new, vy_new
@@ -148,4 +164,3 @@ class DemoGame:
                 return rect.centerx, frame
 
         return rect.centerx, 2000
-
