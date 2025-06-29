@@ -2,7 +2,7 @@
 
 import pygame
 import sys
-from constants import WIDTH, HEIGHT, FPS
+from constants import Screen
 
 
 def run_menu(screen, clock) -> None:
@@ -32,15 +32,15 @@ def run_menu(screen, clock) -> None:
 
         screen.fill("black")
         title = title_font.render("Single-Player Pong", True, "white")
-        screen.blit(title, (WIDTH//2 - title.get_width()//2, HEIGHT//3 - 50))
+        screen.blit(title, (Screen.WIDTH//2 - title.get_width()//2, Screen.HEIGHT//3 - 50))
 
         for i, option in enumerate(options):
             colour = "yellow" if i == selected else "white"
             surf = menu_font.render(option, True, colour)
-            screen.blit(surf, (WIDTH//2 - surf.get_width()//2, HEIGHT//2 + i*40))
+            screen.blit(surf, (Screen.WIDTH//2 - surf.get_width()//2, Screen.HEIGHT//2 + i*40))
 
         pygame.display.flip()
-        clock.tick(FPS)
+        clock.tick(Screen.FPS)
 
 
 def run_game_over(screen, clock, score: int) -> str:
@@ -67,15 +67,15 @@ def run_game_over(screen, clock, score: int) -> str:
 
         screen.fill("black")
         title = title_font.render("Game Over", True, "white")
-        screen.blit(title, (WIDTH//2 - title.get_width()//2, HEIGHT//3 - 50))
+        screen.blit(title, (Screen.WIDTH//2 - title.get_width()//2, Screen.HEIGHT//3 - 50))
 
         score_surf = menu_font.render(f"Score: {score}", True, "white")
-        screen.blit(score_surf, (WIDTH//2 - score_surf.get_width()//2, HEIGHT//2 - 40))
+        screen.blit(score_surf, (Screen.WIDTH//2 - score_surf.get_width()//2, Screen.HEIGHT//2 - 40))
 
         for i, option in enumerate(options):
             colour = "yellow" if i == selected else "white"
             surf = menu_font.render(option, True, colour)
-            screen.blit(surf, (WIDTH//2 - surf.get_width()//2, HEIGHT//2 + i*40))
+            screen.blit(surf, (Screen.WIDTH//2 - surf.get_width()//2, Screen.HEIGHT//2 + i*40))
 
         pygame.display.flip()
-        clock.tick(FPS)
+        clock.tick(Screen.FPS)

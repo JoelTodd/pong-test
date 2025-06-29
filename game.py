@@ -5,21 +5,7 @@ import sys
 import random
 import math
 
-from constants import (
-    WIDTH,
-    HEIGHT,
-    FPS,
-    PADDLE_WIDTH,
-    PADDLE_HEIGHT,
-    PADDLE_SPEED,
-    POWERUP_CHANCE,
-    TRANSITION_RATE,
-    GRAVITY,
-    ANGLE_INFLUENCE,
-    PADDLE_VEL_INFLUENCE,
-    SPEED_INCREMENT,
-    MAX_BALL_SPEED,
-)
+from constants import Screen, Paddle, Ball, Powerup
 from utils import snappy_ease, duplicate_velocity
 from entities import create_ball, spawn_powerup
 
@@ -31,10 +17,10 @@ def run_game(screen, clock, font, debug_font) -> int:
 
     # Set up the player's paddle near the bottom of the screen
     paddle = pygame.Rect(
-        WIDTH // 2 - PADDLE_WIDTH // 2,
-        HEIGHT - 20 - PADDLE_HEIGHT,
-        PADDLE_WIDTH,
-        PADDLE_HEIGHT,
+        Screen.WIDTH // 2 - Paddle.WIDTH // 2,
+        Screen.HEIGHT - 20 - Paddle.HEIGHT,
+        Paddle.WIDTH,
+        Paddle.HEIGHT,
     )
 
     balls = [create_ball()]  # list of active balls on the screen
@@ -48,7 +34,7 @@ def run_game(screen, clock, font, debug_font) -> int:
 
     while True:
         # ``dt`` is the time (in seconds) since the last loop iteration
-        dt = clock.tick(FPS) / 1000.0
+        dt = clock.tick(Screen.FPS) / 1000.0
 
         # Handle window events and toggle debug mode with the M key
         for event in pygame.event.get():
@@ -61,9 +47,9 @@ def run_game(screen, clock, font, debug_font) -> int:
         keys = pygame.key.get_pressed()
         new_target_vx = 0
         if keys[pygame.K_LEFT] and paddle.left > 0:
-            new_target_vx = -PADDLE_SPEED
-        if keys[pygame.K_RIGHT] and paddle.right < WIDTH:
-            new_target_vx = PADDLE_SPEED
+            new_target_vx = -Paddle.SPEED
+        if keys[pygame.K_RIGHT] and paddle.right < Screen.WIDTH:
+            new_target_vx = Paddle.SPEED
 
         # Start a smooth transition whenever the target velocity changes
         if new_target_vx != paddle_target_vx:
@@ -73,7 +59,7 @@ def run_game(screen, clock, font, debug_font) -> int:
 
         # Interpolate towards the target velocity using easing
         if transition_t < 1.0:
-            transition_t = min(transition_t + TRANSITION_RATE * dt, 1.0)
+            transition_t = min(transition_t + Paddle.TRANSITION_RATE * dt, 1.0)
             prog = snappy_ease(transition_t)
             paddle_vx = paddle_start_vx + (paddle_target_vx - paddle_start_vx) * prog
         else:
@@ -81,10 +67,10 @@ def run_game(screen, clock, font, debug_font) -> int:
 
         # Move the paddle and keep it on screen
         paddle.x += paddle_vx
-        paddle.clamp_ip(pygame.Rect(0, 0, WIDTH, HEIGHT))
+        paddle.clamp_ip(pygame.Rect(0, 0, Screen.WIDTH, Screen.HEIGHT))
 
         # Randomly spawn a powerup
-        if powerup is None and random.random() < POWERUP_CHANCE:
+        if powerup is None and random.random() < Powerup.CHANCE:
             powerup = spawn_powerup()
 
         # Update all balls
@@ -93,35 +79,35 @@ def run_game(screen, clock, font, debug_font) -> int:
             prev_vx, prev_vy = b["vx"], b["vy"]
 
             # Apply gravity then update position
-            b["vy"] += GRAVITY
+            b["vy"] += Ball.GRAVITY
             rect.x += b["vx"]
             rect.y += b["vy"]
 
             # Bounce off the side walls
-            if rect.left <= 0 or rect.right >= WIDTH:
+            if rect.left <= 0 or rect.right >= Screen.WIDTH:
                 b["vx"] *= -1
             if rect.top <= 0:
                 # Bounce off the top and gradually speed up
                 b["vy"] *= -1
                 speed = math.hypot(b["vx"], b["vy"])
-                if speed < MAX_BALL_SPEED:
-                    speed = min(speed * SPEED_INCREMENT, MAX_BALL_SPEED)
+                if speed < Ball.MAX_SPEED:
+                    speed = min(speed * Ball.SPEED_INCREMENT, Ball.MAX_SPEED)
                     angle = math.atan2(b["vy"], b["vx"])
                     b["vx"] = int(round(math.cos(angle) * speed))
                     b["vy"] = int(round(math.sin(angle) * speed))
 
             # Bounce off the paddle and angle the ball based on where it hits
             if rect.colliderect(paddle) and b["vy"] > 0:
-                offset = (rect.centerx - paddle.centerx) / (PADDLE_WIDTH / 2)
+                offset = (rect.centerx - paddle.centerx) / (Paddle.WIDTH / 2)
                 b["vy"] *= -1
-                b["vx"] += offset * ANGLE_INFLUENCE + paddle_vx * PADDLE_VEL_INFLUENCE
+                b["vx"] += offset * Ball.ANGLE_INFLUENCE + paddle_vx * Paddle.VEL_INFLUENCE
                 b["vx"] = max(
-                    min(b["vx"] * SPEED_INCREMENT, MAX_BALL_SPEED),
-                    -MAX_BALL_SPEED,
+                    min(b["vx"] * Ball.SPEED_INCREMENT, Ball.MAX_SPEED),
+                    -Ball.MAX_SPEED,
                 )
                 b["vy"] = max(
-                    min(b["vy"] * SPEED_INCREMENT, MAX_BALL_SPEED),
-                    -MAX_BALL_SPEED,
+                    min(b["vy"] * Ball.SPEED_INCREMENT, Ball.MAX_SPEED),
+                    -Ball.MAX_SPEED,
                 )
                 score += 1
 
@@ -148,7 +134,7 @@ def run_game(screen, clock, font, debug_font) -> int:
                 b["ax"] = b["ay"] = 0.0
 
             # Remove balls that fall below the screen
-            if rect.top > HEIGHT:
+            if rect.top > Screen.HEIGHT:
                 balls.remove(b)
 
         # Powerups expire after a set time
@@ -170,7 +156,7 @@ def run_game(screen, clock, font, debug_font) -> int:
 
         # Draw the current score in the top-right corner
         score_surf = font.render(f"Score: {score}", True, "white")
-        screen.blit(score_surf, (WIDTH - score_surf.get_width() - 10, 10))
+        screen.blit(score_surf, (Screen.WIDTH - score_surf.get_width() - 10, 10))
 
         if debug_mode:
             # Display ball statistics on the left side of the screen

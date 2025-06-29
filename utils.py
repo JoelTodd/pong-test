@@ -1,6 +1,6 @@
 import random
 import math
-from constants import BALL_SPEED_X_RANGE, BALL_SPEED_Y_RANGE
+from constants import Ball
 
 def cubic_bezier(t, p0, p1, p2, p3):
     """Simple cubic Bézier curve used for easing."""
@@ -25,10 +25,10 @@ def random_velocity(up: bool = False) -> tuple[int, int]:
 
     # Choose a horizontal component first. "range" is inclusive/exclusive
     # so we convert it to a list before picking a value.
-    vx = random.choice(list(range(*BALL_SPEED_X_RANGE)))
+    vx = random.choice(list(range(*Ball.SPEED_X_RANGE)))
 
     # Vertical speed is always positive; we flip it if the ball should move up.
-    vy = random.choice(range(*BALL_SPEED_Y_RANGE))
+    vy = random.choice(range(*Ball.SPEED_Y_RANGE))
     if up:
         vy *= -1
     return vx, vy

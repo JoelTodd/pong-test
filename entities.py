@@ -1,6 +1,6 @@
 import random
 import pygame
-from constants import WIDTH, HEIGHT, BALL_SIZE, POWERUP_WIDTH, POWERUP_HEIGHT, POWERUP_DURATION
+from constants import Screen, Ball, Powerup
 from utils import random_velocity
 
 # Internal counter used to assign a unique ID to each ball we create.
@@ -16,8 +16,8 @@ def create_ball(up: bool = False, pos: tuple[int, int] | None = None) -> dict:
     global _next_ball_id
 
     # Create the rectangular hitbox for the ball
-    rect = pygame.Rect(0, 0, BALL_SIZE, BALL_SIZE)
-    rect.center = pos or (random.randint(40, WIDTH - 40), HEIGHT // 2)
+    rect = pygame.Rect(0, 0, Ball.SIZE, Ball.SIZE)
+    rect.center = pos or (random.randint(40, Screen.WIDTH - 40), Screen.HEIGHT // 2)
 
     # Pick a starting velocity for the ball
     vx, vy = random_velocity(up)
@@ -32,9 +32,9 @@ def spawn_powerup() -> dict:
     """Create a powerup rectangle at a random location."""
 
     # Position the powerup somewhere near the top half of the screen
-    x = random.randint(20, WIDTH - POWERUP_WIDTH - 20)
-    y = random.randint(80, HEIGHT // 2)
-    rect = pygame.Rect(x, y, POWERUP_WIDTH, POWERUP_HEIGHT)
+    x = random.randint(20, Screen.WIDTH - Powerup.WIDTH - 20)
+    y = random.randint(80, Screen.HEIGHT // 2)
+    rect = pygame.Rect(x, y, Powerup.WIDTH, Powerup.HEIGHT)
 
     # The ``collided`` set keeps track of balls already duplicated by this powerup
-    return {"rect": rect, "timer": POWERUP_DURATION, "collided": set()}
+    return {"rect": rect, "timer": Powerup.DURATION, "collided": set()}

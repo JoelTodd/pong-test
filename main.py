@@ -1,7 +1,7 @@
 """Program entry point for the single-player Pong game."""
 
 import pygame
-from constants import WIDTH, HEIGHT
+from constants import Screen
 from menus import run_menu, run_game_over
 from game import run_game
 
@@ -10,7 +10,7 @@ def main() -> None:
     """Set up Pygame and run the high level game loops."""
 
     pygame.init()
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    screen = pygame.display.set_mode((Screen.WIDTH, Screen.HEIGHT))
     pygame.display.set_caption("Single-Player Pong")
     clock = pygame.time.Clock()
 
