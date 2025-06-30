@@ -17,10 +17,10 @@ Single Player Pong is a vertical-scrolling twist on the classic arcade game. Bui
 
 ## Installation
 
-Clone the repository and install Pygame:
+Clone the repository and install the dependencies:
 
 ```bash
-pip install pygame
+pip install pygame numpy
 ```
 
 ## Running the Game

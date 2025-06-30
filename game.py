@@ -8,6 +8,7 @@ import math
 from constants import Screen, Paddle, Ball, Powerup
 from utils import snappy_ease, duplicate_velocity
 from entities import create_ball, spawn_powerup
+from synth import SOUNDS
 
 
 def run_game(screen, clock, font, debug_font) -> int:
@@ -75,6 +76,7 @@ def run_game(screen, clock, font, debug_font) -> int:
         # Randomly spawn a powerup
         if powerup is None and random.random() < Powerup.CHANCE:
             powerup = spawn_powerup()
+            SOUNDS["powerup"].play()
 
         # Update all balls
         for b in balls[:]:
@@ -91,9 +93,11 @@ def run_game(screen, clock, font, debug_font) -> int:
             # Bounce off the side walls
             if rect.left <= 0 or rect.right >= Screen.WIDTH:
                 b["vx"] *= -1
+                SOUNDS["bounce"].play()
             if rect.top <= 0:
                 # Bounce off the top and gradually speed up
                 b["vy"] *= -1
+                SOUNDS["bounce"].play()
                 speed = math.hypot(b["vx"], b["vy"])
                 if speed < Ball.MAX_SPEED:
                     speed = min(speed * Ball.SPEED_INCREMENT, Ball.MAX_SPEED)
@@ -105,6 +109,7 @@ def run_game(screen, clock, font, debug_font) -> int:
             if rect.colliderect(paddle) and b["vy"] > 0:
                 offset = (rect.centerx - paddle.centerx) / (Paddle.WIDTH / 2)
                 b["vy"] *= -1
+                SOUNDS["bounce"].play()
                 b["vx"] += (
                     offset * Ball.ANGLE_INFLUENCE
                     + paddle_vx * Paddle.VEL_INFLUENCE
@@ -133,6 +138,7 @@ def run_game(screen, clock, font, debug_font) -> int:
                     nb["vx"], nb["vy"] = vx_new, vy_new
                     powerup["collided"].update({ball_id, nb["id"]})
                     balls.append(nb)
+                    SOUNDS["powerup"].play()
                 elif not p_rect.colliderect(rect):
                     # Once a ball leaves, allow it to trigger again later
                     powerup["collided"].discard(ball_id)
