@@ -27,6 +27,11 @@ def run_game(screen, clock, font, debug_font) -> int:
     powerup = None           # there may or may not be a powerup present
     score = 0
 
+    # Pre-render the score label so it doesn't need to be recreated
+    score_label_surf = font.render("Score:", True, "white")
+    # Track animation progress for the bouncing effect on the score number
+    score_bounce_t = 1.0
+
     paddle_vx: float = 0.0           # current horizontal velocity
     paddle_target_vx: float = 0.0    # desired velocity based on input
     paddle_start_vx: float = 0.0     # velocity at the start of a transition
@@ -118,6 +123,8 @@ def run_game(screen, clock, font, debug_font) -> int:
                     -Ball.MAX_SPEED,
                 )
                 score += 1
+                # Restart the bounce animation whenever the score increases
+                score_bounce_t = 0.0
 
             # Handle collisions with the powerup bar
             if powerup:
@@ -165,10 +172,21 @@ def run_game(screen, clock, font, debug_font) -> int:
         if powerup:
             pygame.draw.rect(screen, "yellow", powerup["rect"])
 
-        # Draw the current score in the top-right corner
-        score_surf = font.render(f"Score: {score}", True, "white")
+        # Update the bounce animation timer
+        if score_bounce_t < 1.0:
+            score_bounce_t = min(score_bounce_t + dt / 0.3, 1.0)
+            offset = -abs(math.sin(score_bounce_t * math.pi)) * 10
+        else:
+            offset = 0
+
+        # Draw the current score in the top-right corner with bouncing digits
+        score_num_surf = font.render(str(score), True, "white")
+        total_w = score_label_surf.get_width() + score_num_surf.get_width() + 5
+        x = Screen.WIDTH - total_w - 10
+        screen.blit(score_label_surf, (x, 10))
         screen.blit(
-            score_surf, (Screen.WIDTH - score_surf.get_width() - 10, 10)
+            score_num_surf,
+            (x + score_label_surf.get_width() + 5, 10 + offset),
         )
 
         if debug_mode:
