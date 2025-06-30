@@ -42,13 +42,23 @@ def create_ball(up: bool = False, pos: tuple[int, int] | None = None) -> dict:
 
 
 def spawn_powerup() -> dict:
-    """Create a powerup rectangle at a random location."""
+    """Create a powerup rectangle at a random location.
+
+    Randomly chooses between duplicating balls or modifying the paddle size.
+    The ``type`` field identifies which behaviour to apply when a ball hits it.
+    """
 
     # Position the powerup somewhere near the top half of the screen
     x = random.randint(20, Screen.WIDTH - Powerup.WIDTH - 20)
     y = random.randint(80, Screen.HEIGHT // 2)
     rect = pygame.Rect(x, y, Powerup.WIDTH, Powerup.HEIGHT)
 
-    # The ``collided`` set keeps track of balls already duplicated by this
-    # powerup
-    return {"rect": rect, "timer": Powerup.DURATION, "collided": set()}
+    p_type = random.choice(["duplicate", "paddle_big", "paddle_small"])
+
+    # The ``collided`` set keeps track of balls that have triggered this powerup
+    return {
+        "rect": rect,
+        "timer": Powerup.DURATION,
+        "collided": set(),
+        "type": p_type,
+    }

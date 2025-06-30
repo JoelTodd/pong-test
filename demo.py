@@ -26,9 +26,17 @@ class DemoGame:
         self.paddle_vx: float = 0.0
         self.balls = [create_ball()]  # start with a single ball
         self.powerup: dict | None = None
+        self.paddle_power_timer = 0.0
 
     def update(self, dt: float) -> None:
         """Advance the demo simulation by one frame."""
+
+        if self.paddle_power_timer > 0:
+            self.paddle_power_timer -= dt
+            if self.paddle_power_timer <= 0:
+                center = self.paddle.centerx
+                self.paddle.width = Paddle.WIDTH
+                self.paddle.centerx = center
 
         # Autopilot: track whichever ball will hit the paddle next. A small
         # random offset keeps the motion from looking too mechanical.
@@ -116,11 +124,23 @@ class DemoGame:
                     p_rect.colliderect(rect)
                     and ball_id not in self.powerup["collided"]
                 ):
-                    vx_new, vy_new = duplicate_velocity(b["vx"], b["vy"])
-                    nb = create_ball(up=b["vy"] < 0, pos=rect.center)
-                    nb["vx"], nb["vy"] = vx_new, vy_new
-                    self.powerup["collided"].update({ball_id, nb["id"]})
-                    self.balls.append(nb)
+                    if self.powerup["type"] == "duplicate":
+                        vx_new, vy_new = duplicate_velocity(b["vx"], b["vy"])
+                        nb = create_ball(up=b["vy"] < 0, pos=rect.center)
+                        nb["vx"], nb["vy"] = vx_new, vy_new
+                        self.balls.append(nb)
+                        self.powerup["collided"].update({ball_id, nb["id"]})
+                    else:
+                        factor = (
+                            Powerup.ENLARGE_FACTOR
+                            if self.powerup["type"] == "paddle_big"
+                            else Powerup.SHRINK_FACTOR
+                        )
+                        center = self.paddle.centerx
+                        self.paddle.width = int(Paddle.WIDTH * factor)
+                        self.paddle.centerx = center
+                        self.paddle_power_timer = Powerup.SIZE_DURATION
+                        self.powerup["collided"].add(ball_id)
                 elif not p_rect.colliderect(rect):
                     self.powerup["collided"].discard(ball_id)
 
@@ -140,7 +160,12 @@ class DemoGame:
         for b in self.balls:
             pygame.draw.ellipse(surface, "white", b["rect"])
         if self.powerup:
-            pygame.draw.rect(surface, "yellow", self.powerup["rect"])
+            colour = {
+                "duplicate": "yellow",
+                "paddle_big": "blue",
+                "paddle_small": "red",
+            }.get(self.powerup["type"], "yellow")
+            pygame.draw.rect(surface, colour, self.powerup["rect"])
 
     def _predict_intercept(self, ball: dict) -> tuple[float, int]:
         """Return where and in how many frames ``ball`` will hit the paddle."""

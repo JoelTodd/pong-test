@@ -39,5 +39,10 @@ class Powerup:
     DURATION = 8.0
     CHANCE = 0.005
 
+    # Paddle size modification
+    SIZE_DURATION = 6.0
+    ENLARGE_FACTOR = 1.5
+    SHRINK_FACTOR = 0.6
+
 
 __all__ = ["Screen", "Paddle", "Ball", "Powerup"]

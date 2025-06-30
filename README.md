@@ -8,6 +8,7 @@ Single Player Pong is a vertical-scrolling twist on the classic arcade game. Bui
 
 - Balls speed up after bouncing off the top wall or your paddle
 - Yellow power-ups briefly appear and duplicate any ball that passes through them
+- Blue power-ups enlarge your paddle for a short time, while red ones shrink it
 - The game ends only when every ball is missed
 
 ## Requirements

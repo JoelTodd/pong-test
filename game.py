@@ -27,6 +27,9 @@ def run_game(screen, clock, font, debug_font) -> int:
     powerup = None           # there may or may not be a powerup present
     score = 0
 
+    paddle_power_timer = 0.0
+    paddle_power_effect: str | None = None
+
     paddle_vx: float = 0.0           # current horizontal velocity
     paddle_target_vx: float = 0.0    # desired velocity based on input
     paddle_start_vx: float = 0.0     # velocity at the start of a transition
@@ -35,6 +38,15 @@ def run_game(screen, clock, font, debug_font) -> int:
     while True:
         # ``dt`` is the time (in seconds) since the last loop iteration
         dt = clock.tick(Screen.FPS) / 1000.0
+
+        if paddle_power_timer > 0:
+            paddle_power_timer -= dt
+            if paddle_power_timer <= 0:
+                # restore paddle size
+                center = paddle.centerx
+                paddle.width = Paddle.WIDTH
+                paddle.centerx = center
+                paddle_power_effect = None
 
         # Handle window events and toggle debug mode with the M key
         for event in pygame.event.get():
@@ -127,12 +139,26 @@ def run_game(screen, clock, font, debug_font) -> int:
                     p_rect.colliderect(rect)
                     and ball_id not in powerup["collided"]
                 ):
-                    # Duplicate the ball in a new random direction
-                    vx_new, vy_new = duplicate_velocity(b["vx"], b["vy"])
-                    nb = create_ball(up=b["vy"] < 0, pos=rect.center)
-                    nb["vx"], nb["vy"] = vx_new, vy_new
-                    powerup["collided"].update({ball_id, nb["id"]})
-                    balls.append(nb)
+                    if powerup["type"] == "duplicate":
+                        # Duplicate the ball in a new random direction
+                        vx_new, vy_new = duplicate_velocity(b["vx"], b["vy"])
+                        nb = create_ball(up=b["vy"] < 0, pos=rect.center)
+                        nb["vx"], nb["vy"] = vx_new, vy_new
+                        balls.append(nb)
+                        powerup["collided"].update({ball_id, nb["id"]})
+                    else:
+                        # Modify paddle size
+                        factor = (
+                            Powerup.ENLARGE_FACTOR
+                            if powerup["type"] == "paddle_big"
+                            else Powerup.SHRINK_FACTOR
+                        )
+                        center = paddle.centerx
+                        paddle.width = int(Paddle.WIDTH * factor)
+                        paddle.centerx = center
+                        paddle_power_timer = Powerup.SIZE_DURATION
+                        paddle_power_effect = powerup["type"]
+                        powerup["collided"].add(ball_id)
                 elif not p_rect.colliderect(rect):
                     # Once a ball leaves, allow it to trigger again later
                     powerup["collided"].discard(ball_id)
@@ -163,7 +189,12 @@ def run_game(screen, clock, font, debug_font) -> int:
         for b in balls:
             pygame.draw.ellipse(screen, "white", b["rect"])
         if powerup:
-            pygame.draw.rect(screen, "yellow", powerup["rect"])
+            colour = {
+                "duplicate": "yellow",
+                "paddle_big": "blue",
+                "paddle_small": "red",
+            }.get(powerup["type"], "yellow")
+            pygame.draw.rect(screen, colour, powerup["rect"])
 
         # Draw the current score in the top-right corner
         score_surf = font.render(f"Score: {score}", True, "white")
