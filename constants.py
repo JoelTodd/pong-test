@@ -40,4 +40,15 @@ class Powerup:
     CHANCE = 0.005
 
 
-__all__ = ["Screen", "Paddle", "Ball", "Powerup"]
+class SlowPowerup:
+    """Power-up that temporarily slows all balls."""
+
+    WIDTH = 100
+    HEIGHT = 4
+    DURATION = 8.0
+    CHANCE = 0.003
+    EFFECT_TIME = 4.0
+    SPEED_FACTOR = 0.5
+
+
+__all__ = ["Screen", "Paddle", "Ball", "Powerup", "SlowPowerup"]

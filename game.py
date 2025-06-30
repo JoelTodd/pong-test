@@ -5,7 +5,7 @@ import sys
 import random
 import math
 
-from constants import Screen, Paddle, Ball, Powerup
+from constants import Screen, Paddle, Ball, Powerup, SlowPowerup
 from utils import snappy_ease, duplicate_velocity
 from entities import create_ball, spawn_powerup
 
@@ -26,6 +26,7 @@ def run_game(screen, clock, font, debug_font) -> int:
     balls = [create_ball()]  # list of active balls on the screen
     powerup = None           # there may or may not be a powerup present
     score = 0
+    slow_timer: float = 0.0  # duration remaining for the slow effect
 
     paddle_vx: float = 0.0           # current horizontal velocity
     paddle_target_vx: float = 0.0    # desired velocity based on input
@@ -35,6 +36,9 @@ def run_game(screen, clock, font, debug_font) -> int:
     while True:
         # ``dt`` is the time (in seconds) since the last loop iteration
         dt = clock.tick(Screen.FPS) / 1000.0
+        if slow_timer > 0:
+            slow_timer = max(0.0, slow_timer - dt)
+        speed_factor = SlowPowerup.SPEED_FACTOR if slow_timer > 0 else 1.0
 
         # Handle window events and toggle debug mode with the M key
         for event in pygame.event.get():
@@ -73,7 +77,8 @@ def run_game(screen, clock, font, debug_font) -> int:
         paddle.clamp_ip(pygame.Rect(0, 0, Screen.WIDTH, Screen.HEIGHT))
 
         # Randomly spawn a powerup
-        if powerup is None and random.random() < Powerup.CHANCE:
+        spawn_prob = Powerup.CHANCE + SlowPowerup.CHANCE
+        if powerup is None and random.random() < spawn_prob:
             powerup = spawn_powerup()
 
         # Update all balls
@@ -82,9 +87,9 @@ def run_game(screen, clock, font, debug_font) -> int:
             prev_vx, prev_vy = b["vx"], b["vy"]
 
             # Apply gravity then update position using sub-pixel accuracy
-            b["vy"] += Ball.GRAVITY
-            b["x"] += b["vx"]
-            b["y"] += b["vy"]
+            b["vy"] += Ball.GRAVITY * speed_factor
+            b["x"] += b["vx"] * speed_factor
+            b["y"] += b["vy"] * speed_factor
             rect.x = round(b["x"])
             rect.y = round(b["y"])
 
@@ -123,19 +128,24 @@ def run_game(screen, clock, font, debug_font) -> int:
             if powerup:
                 p_rect = powerup["rect"]
                 ball_id = b["id"]
-                if (
-                    p_rect.colliderect(rect)
-                    and ball_id not in powerup["collided"]
-                ):
-                    # Duplicate the ball in a new random direction
-                    vx_new, vy_new = duplicate_velocity(b["vx"], b["vy"])
-                    nb = create_ball(up=b["vy"] < 0, pos=rect.center)
-                    nb["vx"], nb["vy"] = vx_new, vy_new
-                    powerup["collided"].update({ball_id, nb["id"]})
-                    balls.append(nb)
-                elif not p_rect.colliderect(rect):
-                    # Once a ball leaves, allow it to trigger again later
-                    powerup["collided"].discard(ball_id)
+                if powerup.get("type") == "slow":
+                    if p_rect.colliderect(rect):
+                        slow_timer = SlowPowerup.EFFECT_TIME
+                        powerup = None
+                else:
+                    if (
+                        p_rect.colliderect(rect)
+                        and ball_id not in powerup["collided"]
+                    ):
+                        # Duplicate the ball in a new random direction
+                        vx_new, vy_new = duplicate_velocity(b["vx"], b["vy"])
+                        nb = create_ball(up=b["vy"] < 0, pos=rect.center)
+                        nb["vx"], nb["vy"] = vx_new, vy_new
+                        powerup["collided"].update({ball_id, nb["id"]})
+                        balls.append(nb)
+                    elif not p_rect.colliderect(rect):
+                        # Once a ball leaves, allow it to trigger again later
+                        powerup["collided"].discard(ball_id)
 
             # Compute acceleration for debug display
             if dt > 0:
@@ -163,7 +173,8 @@ def run_game(screen, clock, font, debug_font) -> int:
         for b in balls:
             pygame.draw.ellipse(screen, "white", b["rect"])
         if powerup:
-            pygame.draw.rect(screen, "yellow", powerup["rect"])
+            colour = "blue" if powerup.get("type") == "slow" else "yellow"
+            pygame.draw.rect(screen, colour, powerup["rect"])
 
         # Draw the current score in the top-right corner
         score_surf = font.render(f"Score: {score}", True, "white")
