@@ -14,7 +14,7 @@ def _enveloped_sine(
     n_samples = int(SAMPLE_RATE * duration)
     t = np.linspace(0, duration, n_samples, endpoint=False)
     wave = np.sin(2 * np.pi * freq * t)
-    # Simple exponential decay envelope for a percussive effect
+    # Simple exponential decay envelope for a percussive effect.
     envelope = np.exp(-6 * t)
     wave = wave * envelope * volume
     audio = (wave * 32767).astype(np.int16)
@@ -22,7 +22,7 @@ def _enveloped_sine(
     init = pygame.mixer.get_init()
     channels = init[2] if init else 1
     if channels > 1 and audio.ndim == 1:
-        # Duplicate the mono signal for stereo mixers
+        # Duplicate the mono signal for stereo mixers.
         audio = np.repeat(audio[:, None], channels, axis=1)
 
     return pygame.sndarray.make_sound(audio)
