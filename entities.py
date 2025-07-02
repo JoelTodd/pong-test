@@ -1,6 +1,6 @@
 import random
 import pygame
-from constants import Screen, Ball, Powerup, SlowPowerup
+from constants import Screen, Ball, Powerup, SlowPowerup, PowerupType
 from utils import random_velocity
 
 # Internal counter used to assign a unique ID to each ball we create.
@@ -49,14 +49,16 @@ def spawn_powerup() -> dict:
     a ball hits it.
     """
 
-    p_type = random.choice([
-        "duplicate",
-        "paddle_big",
-        "paddle_small",
-        "slow",
-    ])
+    p_type = random.choice(
+        [
+            PowerupType.DUPLICATE,
+            PowerupType.PADDLE_BIG,
+            PowerupType.PADDLE_SMALL,
+            PowerupType.SLOW,
+        ]
+    )
 
-    if p_type == "slow":
+    if p_type is PowerupType.SLOW:
         width, height, duration = (
             SlowPowerup.WIDTH,
             SlowPowerup.HEIGHT,

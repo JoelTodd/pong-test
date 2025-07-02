@@ -31,6 +31,26 @@ class Ball:
     GRAVITY = 0.02
 
 
+from enum import Enum
+
+
+class PowerupType(str, Enum):
+    """Identifier strings for power-up behaviours."""
+
+    DUPLICATE = "duplicate"
+    PADDLE_BIG = "paddle_big"
+    PADDLE_SMALL = "paddle_small"
+    SLOW = "slow"
+
+
+POWERUP_COLOURS = {
+    PowerupType.DUPLICATE: "yellow",
+    PowerupType.PADDLE_BIG: "blue",
+    PowerupType.PADDLE_SMALL: "red",
+    PowerupType.SLOW: "blue",
+}
+
+
 class Powerup:
     """Power-up behaviour and appearance."""
 
@@ -56,4 +76,12 @@ class SlowPowerup:
     SPEED_FACTOR = 0.5
 
 
-__all__ = ["Screen", "Paddle", "Ball", "Powerup", "SlowPowerup"]
+__all__ = [
+    "Screen",
+    "Paddle",
+    "Ball",
+    "PowerupType",
+    "POWERUP_COLOURS",
+    "Powerup",
+    "SlowPowerup",
+]

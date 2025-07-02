@@ -4,7 +4,15 @@ import random
 import math
 import pygame
 
-from constants import Screen, Paddle, Ball, Powerup, SlowPowerup
+from constants import (
+    Screen,
+    Paddle,
+    Ball,
+    Powerup,
+    SlowPowerup,
+    PowerupType,
+    POWERUP_COLOURS,
+)
 from entities import create_ball, spawn_powerup
 from utils import duplicate_velocity
 
@@ -126,7 +134,7 @@ class DemoGame:
             if self.powerup:
                 p_rect = self.powerup["rect"]
                 ball_id = b["id"]
-                if self.powerup["type"] == "slow":
+                if self.powerup["type"] is PowerupType.SLOW:
                     if p_rect.colliderect(rect):
                         self.slow_timer = SlowPowerup.EFFECT_TIME
                         self.powerup = None
@@ -135,7 +143,7 @@ class DemoGame:
                         p_rect.colliderect(rect)
                         and ball_id not in self.powerup["collided"]
                     ):
-                        if self.powerup["type"] == "duplicate":
+                        if self.powerup["type"] is PowerupType.DUPLICATE:
                             vx_new, vy_new = duplicate_velocity(b["vx"], b["vy"])
                             nb = create_ball(up=b["vy"] < 0, pos=rect.center)
                             nb["vx"], nb["vy"] = vx_new, vy_new
@@ -144,7 +152,7 @@ class DemoGame:
                         else:
                             factor = (
                                 Powerup.ENLARGE_FACTOR
-                                if self.powerup["type"] == "paddle_big"
+                                if self.powerup["type"] is PowerupType.PADDLE_BIG
                                 else Powerup.SHRINK_FACTOR
                             )
                             center = self.paddle.centerx
@@ -171,12 +179,7 @@ class DemoGame:
         for b in self.balls:
             pygame.draw.ellipse(surface, "white", b["rect"])
         if self.powerup:
-            colour = {
-                "duplicate": "yellow",
-                "paddle_big": "blue",
-                "paddle_small": "red",
-                "slow": "blue",
-            }.get(self.powerup["type"], "yellow")
+            colour = POWERUP_COLOURS.get(self.powerup["type"], "yellow")
             pygame.draw.rect(surface, colour, self.powerup["rect"])
 
     def _predict_intercept(self, ball: dict) -> tuple[float, int]:

@@ -5,7 +5,15 @@ import sys
 import random
 import math
 
-from constants import Screen, Paddle, Ball, Powerup, SlowPowerup
+from constants import (
+    Screen,
+    Paddle,
+    Ball,
+    Powerup,
+    SlowPowerup,
+    PowerupType,
+    POWERUP_COLOURS,
+)
 from utils import snappy_ease, duplicate_velocity
 from entities import create_ball, spawn_powerup
 from synth import SOUNDS
@@ -30,7 +38,7 @@ def run_game(screen, clock, font, debug_font) -> int:
     slow_timer: float = 0.0  # duration remaining for the slow effect
 
     paddle_power_timer = 0.0
-    paddle_power_effect: str | None = None
+    paddle_power_effect: PowerupType | None = None
 
     # Pre-render the score label so it doesn't need to be recreated
     score_label_surf = font.render("Score:", True, "white")
@@ -152,7 +160,7 @@ def run_game(screen, clock, font, debug_font) -> int:
             if powerup:
                 p_rect = powerup["rect"]
                 ball_id = b["id"]
-                if powerup["type"] == "slow":
+                if powerup["type"] is PowerupType.SLOW:
                     if p_rect.colliderect(rect):
                         slow_timer = SlowPowerup.EFFECT_TIME
                         powerup = None
@@ -161,7 +169,7 @@ def run_game(screen, clock, font, debug_font) -> int:
                         p_rect.colliderect(rect)
                         and ball_id not in powerup["collided"]
                     ):
-                        if powerup["type"] == "duplicate":
+                        if powerup["type"] is PowerupType.DUPLICATE:
                             vx_new, vy_new = duplicate_velocity(b["vx"], b["vy"])
                             nb = create_ball(up=b["vy"] < 0, pos=rect.center)
                             nb["vx"], nb["vy"] = vx_new, vy_new
@@ -171,7 +179,7 @@ def run_game(screen, clock, font, debug_font) -> int:
                         else:
                             factor = (
                                 Powerup.ENLARGE_FACTOR
-                                if powerup["type"] == "paddle_big"
+                                if powerup["type"] is PowerupType.PADDLE_BIG
                                 else Powerup.SHRINK_FACTOR
                             )
                             center = paddle.centerx
@@ -210,12 +218,7 @@ def run_game(screen, clock, font, debug_font) -> int:
         for b in balls:
             pygame.draw.ellipse(screen, "white", b["rect"])
         if powerup:
-            colour = {
-                "duplicate": "yellow",
-                "paddle_big": "blue",
-                "paddle_small": "red",
-                "slow": "blue",
-            }.get(powerup["type"], "yellow")
+            colour = POWERUP_COLOURS.get(powerup["type"], "yellow")
             pygame.draw.rect(screen, colour, powerup["rect"])
 
         # Update the bounce animation timer
