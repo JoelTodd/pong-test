@@ -1,10 +1,15 @@
 import numpy as np
+from pygame import mixer
 import pygame
 
 SAMPLE_RATE = 44100
 
 
-def _enveloped_sine(freq: float, duration: float, volume: float) -> pygame.mixer.Sound:
+def _enveloped_sine(
+    freq: float,
+    duration: float,
+    volume: float,
+) -> mixer.Sound:
     """Return a pygame Sound containing a short sine wave burst."""
     n_samples = int(SAMPLE_RATE * duration)
     t = np.linspace(0, duration, n_samples, endpoint=False)
@@ -23,12 +28,11 @@ def _enveloped_sine(freq: float, duration: float, volume: float) -> pygame.mixer
     return pygame.sndarray.make_sound(audio)
 
 
-SOUNDS: dict[str, pygame.mixer.Sound] = {}
+SOUNDS: dict[str, mixer.Sound] = {}
 
 
 def init_sounds() -> None:
     """Generate all game sound effects."""
-    global SOUNDS
     SOUNDS["bounce"] = _enveloped_sine(880, 0.12, 0.5)
     SOUNDS["powerup"] = _enveloped_sine(1200, 0.15, 0.6)
     SOUNDS["menu_move"] = _enveloped_sine(660, 0.07, 0.4)
