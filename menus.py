@@ -4,6 +4,7 @@ import pygame
 import sys
 from constants import Screen
 from demo import DemoGame
+from synth import SOUNDS
 
 
 def run_menu(screen, clock) -> None:
@@ -29,13 +30,17 @@ def run_menu(screen, clock) -> None:
                 if event.key in (pygame.K_UP, pygame.K_w):
                     # Move selection up
                     selected = (selected - 1) % len(options)
+                    SOUNDS["menu_move"].play()
                 elif event.key in (pygame.K_DOWN, pygame.K_s):
                     # Move selection down
                     selected = (selected + 1) % len(options)
+                    SOUNDS["menu_move"].play()
                 elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
                     if options[selected] == "Start Game":
+                        SOUNDS["menu_select"].play()
                         return
                     pygame.quit()
+                    SOUNDS["menu_select"].play()
                     sys.exit()
 
         demo.update(dt)
@@ -84,10 +89,13 @@ def run_game_over(screen, clock, score: int) -> str:
                 if event.key in (pygame.K_UP, pygame.K_w):
                     # Move selection up
                     selected = (selected - 1) % len(options)
+                    SOUNDS["menu_move"].play()
                 elif event.key in (pygame.K_DOWN, pygame.K_s):
                     # Move selection down
                     selected = (selected + 1) % len(options)
+                    SOUNDS["menu_move"].play()
                 elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
+                    SOUNDS["menu_select"].play()
                     return "retry" if selected == 0 else "menu"
 
         screen.fill("black")

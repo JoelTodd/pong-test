@@ -31,13 +31,76 @@ class Ball:
     GRAVITY = 0.02
 
 
-class Powerup:
-    """Power-up behaviour and appearance."""
+from enum import Enum
+
+
+class PowerupType(str, Enum):
+    """Identifier strings for power-up behaviours."""
+
+    DUPLICATE = "duplicate"
+    PADDLE_BIG = "paddle_big"
+    PADDLE_SMALL = "paddle_small"
+    SLOW = "slow"
+
+
+POWERUP_COLOURS = {
+    PowerupType.DUPLICATE: "yellow",
+    PowerupType.PADDLE_BIG: "blue",
+    PowerupType.PADDLE_SMALL: "red",
+    PowerupType.SLOW: "blue",
+}
+
+
+class BasePowerup:
+    """Base values shared across power-ups."""
 
     WIDTH = 100
     HEIGHT = 4
     DURATION = 8.0
+
+
+class DuplicatePowerup(BasePowerup):
+    """Ball-duplicating power-up settings."""
+
     CHANCE = 0.005
 
 
-__all__ = ["Screen", "Paddle", "Ball", "Powerup"]
+class PaddleBigPowerup(BasePowerup):
+    """Temporarily enlarge the paddle."""
+
+    CHANCE = 0.005
+    SIZE_DURATION = 6.0
+    ENLARGE_FACTOR = 1.5
+
+
+class PaddleSmallPowerup(BasePowerup):
+    """Temporarily shrink the paddle."""
+
+    CHANCE = 0.005
+    SIZE_DURATION = 6.0
+    SHRINK_FACTOR = 0.6
+
+
+class SlowPowerup:
+    """Power-up that temporarily slows all balls."""
+
+    WIDTH = 100
+    HEIGHT = 4
+    DURATION = 8.0
+    CHANCE = 0.003
+    EFFECT_TIME = 4.0
+    SPEED_FACTOR = 0.5
+
+
+__all__ = [
+    "Screen",
+    "Paddle",
+    "Ball",
+    "PowerupType",
+    "POWERUP_COLOURS",
+    "BasePowerup",
+    "DuplicatePowerup",
+    "PaddleBigPowerup",
+    "PaddleSmallPowerup",
+    "SlowPowerup",
+]
