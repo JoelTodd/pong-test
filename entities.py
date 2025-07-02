@@ -1,3 +1,5 @@
+"""Helpers for creating balls and power-up rectangles."""
+
 import random
 import pygame
 from constants import (
@@ -18,9 +20,13 @@ _next_ball_id = 0
 def create_ball(up: bool = False, pos: tuple[int, int] | None = None) -> dict:
     """Return a new ball dictionary.
 
-    ``up`` flips the initial vertical direction so the ball moves upward
-    instead of downward. ``pos`` allows explicitly setting the starting
-    position; otherwise a random location is chosen.
+    Parameters
+    ----------
+    up:
+        If ``True`` the ball initially travels upward instead of downward.
+    pos:
+        Optional starting position for the ball's centre.  When omitted a
+        random location is chosen.
     """
     global _next_ball_id
 
@@ -50,11 +56,11 @@ def create_ball(up: bool = False, pos: tuple[int, int] | None = None) -> dict:
 
 
 def spawn_powerup() -> dict:
-    """Create a powerup rectangle at a random location.
+    """Return a randomly positioned power-up dictionary.
 
-    Randomly chooses between duplicating balls, resizing the paddle or slowing
-    down all balls. The ``type`` field identifies which behaviour to apply when
-    a ball hits it.
+    A random type is chosen between ball duplication, paddle resizing and
+    slow motion.  The returned dictionary includes a ``rect`` for collision,
+    a countdown ``timer`` and a ``type`` key describing the effect.
     """
 
     p_type = random.choice(

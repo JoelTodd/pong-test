@@ -1,10 +1,12 @@
+"""Utility functions for easing curves and velocity helpers."""
+
 import random
 import math
 from constants import Ball
 
 
 def cubic_bezier(t, p0, p1, p2, p3):
-    """Simple cubic Bézier curve used for easing."""
+    """Evaluate a cubic Bézier curve."""
 
     return (
         (1 - t) ** 3 * p0
@@ -15,14 +17,21 @@ def cubic_bezier(t, p0, p1, p2, p3):
 
 
 def snappy_ease(t: float) -> float:
-    """Clamp ``t`` into [0, 1] then apply a Bézier easing curve."""
+    """Clamp ``t`` to ``[0, 1]`` and apply a snappy Bézier easing."""
 
     t = max(0.0, min(1.0, t))
     return cubic_bezier(t, 0.0, 0.1, 0.9, 1.0)
 
 
 def random_velocity(up: bool = False) -> tuple[float, float]:
-    """Return a random starting velocity for a ball."""
+    """Return a random starting velocity for a ball.
+
+    Parameters
+    ----------
+    up:
+        When ``True`` the vertical component is negated so the ball travels
+        upward.
+    """
 
     # Choose a horizontal component first. The ``range`` is inclusive/exclusive
     # so we convert it to a list before picking a value.
@@ -38,7 +47,15 @@ def random_velocity(up: bool = False) -> tuple[float, float]:
 def duplicate_velocity(
     vx_current: float, vy_current: float
 ) -> tuple[float, float]:
-    """Same speed, different direction (avoid perfectly horizontal)."""
+    """Generate a velocity of equal speed in a new random direction.
+
+    Parameters
+    ----------
+    vx_current:
+        Current horizontal velocity of the ball.
+    vy_current:
+        Current vertical velocity of the ball; its sign is preserved.
+    """
 
     speed = math.hypot(vx_current, vy_current)
     while True:

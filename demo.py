@@ -1,4 +1,4 @@
-# Simple autoplay demonstration used for background animations in menus.
+"""Autoplay simulation used as a backdrop for the menu screens."""
 
 import random
 import math
@@ -20,12 +20,13 @@ from utils import duplicate_velocity
 
 
 class DemoGame:
-    """Lightweight, non-interactive gameplay used on menu screens."""
+    """Lightweight game loop that runs automatically on menu screens."""
 
     def __init__(self) -> None:
         self.reset()
 
     def reset(self) -> None:
+        """Reset the demo to its initial state."""
         self.paddle = pygame.Rect(
             Screen.WIDTH // 2 - Paddle.WIDTH // 2,
             Screen.HEIGHT - 20 - Paddle.HEIGHT,
@@ -40,7 +41,7 @@ class DemoGame:
         self.slow_timer: float = 0.0
 
     def update(self, dt: float) -> None:
-        """Advance the demo simulation by one frame."""
+        """Advance the simulation by ``dt`` seconds."""
 
         if self.paddle_power_timer > 0:
             self.paddle_power_timer -= dt
@@ -202,7 +203,7 @@ class DemoGame:
             pygame.draw.rect(surface, colour, self.powerup["rect"])
 
     def _predict_intercept(self, ball: dict) -> tuple[float, int]:
-        """Return where and in how many frames ``ball`` will hit the paddle."""
+        """Return the predicted x-position and frames until impact."""
         rect = ball["rect"].copy()
         vx, vy = ball["vx"], ball["vy"]
 
