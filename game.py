@@ -40,7 +40,6 @@ def run_game(screen, clock, font, debug_font) -> int:
     slow_timer: float = 0.0  # Duration remaining for the slow effect.
 
     paddle_power_timer = 0.0
-    paddle_power_effect: PowerupType | None = None
 
     # Pre-render the score label so it doesn't need to be recreated.
     score_label_surf = font.render("Score:", True, "white")
@@ -66,7 +65,6 @@ def run_game(screen, clock, font, debug_font) -> int:
                 center = paddle.centerx
                 paddle.width = Paddle.WIDTH
                 paddle.centerx = center
-                paddle_power_effect = None
 
         # Handle window events and toggle debug mode with the M key.
         for event in pygame.event.get():
@@ -177,7 +175,10 @@ def run_game(screen, clock, font, debug_font) -> int:
                         and ball_id not in powerup["collided"]
                     ):
                         if powerup["type"] is PowerupType.DUPLICATE:
-                            vx_new, vy_new = duplicate_velocity(b["vx"], b["vy"])
+                            vx_new, vy_new = duplicate_velocity(
+                                b["vx"],
+                                b["vy"],
+                            )
                             nb = create_ball(up=b["vy"] < 0, pos=rect.center)
                             nb["vx"], nb["vy"] = vx_new, vy_new
                             balls.append(nb)
@@ -192,8 +193,9 @@ def run_game(screen, clock, font, debug_font) -> int:
                             center = paddle.centerx
                             paddle.width = int(Paddle.WIDTH * factor)
                             paddle.centerx = center
-                            paddle_power_timer = PaddleBigPowerup.SIZE_DURATION
-                            paddle_power_effect = powerup["type"]
+                            paddle_power_timer = (
+                                PaddleBigPowerup.SIZE_DURATION
+                            )
                             powerup["collided"].add(ball_id)
                     elif not p_rect.colliderect(rect):
                         # Once a ball leaves, allow it to trigger again later.

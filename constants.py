@@ -1,5 +1,7 @@
 """Collection of gameplay constants split into logical categories."""
 
+from enum import Enum
+
 
 class Screen:
     """Window dimensions and framerate."""
@@ -29,9 +31,6 @@ class Ball:
     MAX_SPEED = 15
     ANGLE_INFLUENCE = 5
     GRAVITY = 0.02
-
-
-from enum import Enum
 
 
 class PowerupType(str, Enum):
