@@ -9,7 +9,9 @@ from constants import (
     Screen,
     Paddle,
     Ball,
-    Powerup,
+    DuplicatePowerup,
+    PaddleBigPowerup,
+    PaddleSmallPowerup,
     SlowPowerup,
     PowerupType,
     POWERUP_COLOURS,
@@ -103,7 +105,12 @@ def run_game(screen, clock, font, debug_font) -> int:
         paddle.clamp_ip(pygame.Rect(0, 0, Screen.WIDTH, Screen.HEIGHT))
 
         # Randomly spawn a powerup
-        spawn_prob = Powerup.CHANCE + SlowPowerup.CHANCE
+        spawn_prob = (
+            DuplicatePowerup.CHANCE
+            + PaddleBigPowerup.CHANCE
+            + PaddleSmallPowerup.CHANCE
+            + SlowPowerup.CHANCE
+        )
         if powerup is None and random.random() < spawn_prob:
             powerup = spawn_powerup()
             SOUNDS["powerup"].play()
@@ -178,14 +185,14 @@ def run_game(screen, clock, font, debug_font) -> int:
                             SOUNDS["powerup"].play()
                         else:
                             factor = (
-                                Powerup.ENLARGE_FACTOR
+                                PaddleBigPowerup.ENLARGE_FACTOR
                                 if powerup["type"] is PowerupType.PADDLE_BIG
-                                else Powerup.SHRINK_FACTOR
+                                else PaddleSmallPowerup.SHRINK_FACTOR
                             )
                             center = paddle.centerx
                             paddle.width = int(Paddle.WIDTH * factor)
                             paddle.centerx = center
-                            paddle_power_timer = Powerup.SIZE_DURATION
+                            paddle_power_timer = PaddleBigPowerup.SIZE_DURATION
                             paddle_power_effect = powerup["type"]
                             powerup["collided"].add(ball_id)
                     elif not p_rect.colliderect(rect):

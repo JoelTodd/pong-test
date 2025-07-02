@@ -8,7 +8,9 @@ from constants import (
     Screen,
     Paddle,
     Ball,
-    Powerup,
+    DuplicatePowerup,
+    PaddleBigPowerup,
+    PaddleSmallPowerup,
     SlowPowerup,
     PowerupType,
     POWERUP_COLOURS,
@@ -89,7 +91,12 @@ class DemoGame:
             )
 
         # Occasionally spawn a powerup
-        spawn_prob = Powerup.CHANCE + SlowPowerup.CHANCE
+        spawn_prob = (
+            DuplicatePowerup.CHANCE
+            + PaddleBigPowerup.CHANCE
+            + PaddleSmallPowerup.CHANCE
+            + SlowPowerup.CHANCE
+        )
         if self.powerup is None and random.random() < spawn_prob:
             self.powerup = spawn_powerup()
 
@@ -151,14 +158,14 @@ class DemoGame:
                             self.powerup["collided"].update({ball_id, nb["id"]})
                         else:
                             factor = (
-                                Powerup.ENLARGE_FACTOR
+                                PaddleBigPowerup.ENLARGE_FACTOR
                                 if self.powerup["type"] is PowerupType.PADDLE_BIG
-                                else Powerup.SHRINK_FACTOR
+                                else PaddleSmallPowerup.SHRINK_FACTOR
                             )
                             center = self.paddle.centerx
                             self.paddle.width = int(Paddle.WIDTH * factor)
                             self.paddle.centerx = center
-                            self.paddle_power_timer = Powerup.SIZE_DURATION
+                            self.paddle_power_timer = PaddleBigPowerup.SIZE_DURATION
                             self.powerup["collided"].add(ball_id)
                     elif not p_rect.colliderect(rect):
                         self.powerup["collided"].discard(ball_id)

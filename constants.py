@@ -51,17 +51,33 @@ POWERUP_COLOURS = {
 }
 
 
-class Powerup:
-    """Power-up behaviour and appearance."""
+class BasePowerup:
+    """Base values shared across power-ups."""
 
     WIDTH = 100
     HEIGHT = 4
     DURATION = 8.0
+
+
+class DuplicatePowerup(BasePowerup):
+    """Ball-duplicating power-up settings."""
+
     CHANCE = 0.005
 
-    # Paddle size modification
+
+class PaddleBigPowerup(BasePowerup):
+    """Temporarily enlarge the paddle."""
+
+    CHANCE = 0.005
     SIZE_DURATION = 6.0
     ENLARGE_FACTOR = 1.5
+
+
+class PaddleSmallPowerup(BasePowerup):
+    """Temporarily shrink the paddle."""
+
+    CHANCE = 0.005
+    SIZE_DURATION = 6.0
     SHRINK_FACTOR = 0.6
 
 
@@ -82,6 +98,9 @@ __all__ = [
     "Ball",
     "PowerupType",
     "POWERUP_COLOURS",
-    "Powerup",
+    "BasePowerup",
+    "DuplicatePowerup",
+    "PaddleBigPowerup",
+    "PaddleSmallPowerup",
     "SlowPowerup",
 ]

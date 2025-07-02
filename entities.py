@@ -1,6 +1,14 @@
 import random
 import pygame
-from constants import Screen, Ball, Powerup, SlowPowerup, PowerupType
+from constants import (
+    Screen,
+    Ball,
+    DuplicatePowerup,
+    PaddleBigPowerup,
+    PaddleSmallPowerup,
+    SlowPowerup,
+    PowerupType,
+)
 from utils import random_velocity
 
 # Internal counter used to assign a unique ID to each ball we create.
@@ -64,11 +72,23 @@ def spawn_powerup() -> dict:
             SlowPowerup.HEIGHT,
             SlowPowerup.DURATION,
         )
+    elif p_type is PowerupType.DUPLICATE:
+        width, height, duration = (
+            DuplicatePowerup.WIDTH,
+            DuplicatePowerup.HEIGHT,
+            DuplicatePowerup.DURATION,
+        )
+    elif p_type is PowerupType.PADDLE_BIG:
+        width, height, duration = (
+            PaddleBigPowerup.WIDTH,
+            PaddleBigPowerup.HEIGHT,
+            PaddleBigPowerup.DURATION,
+        )
     else:
         width, height, duration = (
-            Powerup.WIDTH,
-            Powerup.HEIGHT,
-            Powerup.DURATION,
+            PaddleSmallPowerup.WIDTH,
+            PaddleSmallPowerup.HEIGHT,
+            PaddleSmallPowerup.DURATION,
         )
 
     # Position the powerup somewhere near the top half of the screen
