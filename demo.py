@@ -151,21 +151,32 @@ class DemoGame:
                         and ball_id not in self.powerup["collided"]
                     ):
                         if self.powerup["type"] is PowerupType.DUPLICATE:
-                            vx_new, vy_new = duplicate_velocity(b["vx"], b["vy"])
+                            vx_new, vy_new = duplicate_velocity(
+                                b["vx"],
+                                b["vy"],
+                            )
                             nb = create_ball(up=b["vy"] < 0, pos=rect.center)
                             nb["vx"], nb["vy"] = vx_new, vy_new
                             self.balls.append(nb)
-                            self.powerup["collided"].update({ball_id, nb["id"]})
+                            self.powerup["collided"].update(
+                                {ball_id, nb["id"]}
+                            )
                         else:
+                            is_big = (
+                                self.powerup["type"]
+                                is PowerupType.PADDLE_BIG
+                            )
                             factor = (
                                 PaddleBigPowerup.ENLARGE_FACTOR
-                                if self.powerup["type"] is PowerupType.PADDLE_BIG
+                                if is_big
                                 else PaddleSmallPowerup.SHRINK_FACTOR
                             )
                             center = self.paddle.centerx
                             self.paddle.width = int(Paddle.WIDTH * factor)
                             self.paddle.centerx = center
-                            self.paddle_power_timer = PaddleBigPowerup.SIZE_DURATION
+                            self.paddle_power_timer = (
+                                PaddleBigPowerup.SIZE_DURATION
+                            )
                             self.powerup["collided"].add(ball_id)
                     elif not p_rect.colliderect(rect):
                         self.powerup["collided"].discard(ball_id)
