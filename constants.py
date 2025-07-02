@@ -39,5 +39,21 @@ class Powerup:
     DURATION = 8.0
     CHANCE = 0.005
 
+    # Paddle size modification
+    SIZE_DURATION = 6.0
+    ENLARGE_FACTOR = 1.5
+    SHRINK_FACTOR = 0.6
 
-__all__ = ["Screen", "Paddle", "Ball", "Powerup"]
+
+class SlowPowerup:
+    """Power-up that temporarily slows all balls."""
+
+    WIDTH = 100
+    HEIGHT = 4
+    DURATION = 8.0
+    CHANCE = 0.003
+    EFFECT_TIME = 4.0
+    SPEED_FACTOR = 0.5
+
+
+__all__ = ["Screen", "Paddle", "Ball", "Powerup", "SlowPowerup"]

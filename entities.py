@@ -1,6 +1,6 @@
 import random
 import pygame
-from constants import Screen, Ball, Powerup
+from constants import Screen, Ball, Powerup, SlowPowerup
 from utils import random_velocity
 
 # Internal counter used to assign a unique ID to each ball we create.
@@ -42,13 +42,36 @@ def create_ball(up: bool = False, pos: tuple[int, int] | None = None) -> dict:
 
 
 def spawn_powerup() -> dict:
-    """Create a powerup rectangle at a random location."""
+    """Create a powerup rectangle at a random location.
+
+    Randomly chooses between duplicating balls, resizing the paddle or slowing
+    down all balls. The ``type`` field identifies which behaviour to apply when
+    a ball hits it.
+    """
+
+    p_type = random.choice([
+        "duplicate",
+        "paddle_big",
+        "paddle_small",
+        "slow",
+    ])
+
+    if p_type == "slow":
+        width, height, duration = (
+            SlowPowerup.WIDTH,
+            SlowPowerup.HEIGHT,
+            SlowPowerup.DURATION,
+        )
+    else:
+        width, height, duration = (
+            Powerup.WIDTH,
+            Powerup.HEIGHT,
+            Powerup.DURATION,
+        )
 
     # Position the powerup somewhere near the top half of the screen
-    x = random.randint(20, Screen.WIDTH - Powerup.WIDTH - 20)
+    x = random.randint(20, Screen.WIDTH - width - 20)
     y = random.randint(80, Screen.HEIGHT // 2)
-    rect = pygame.Rect(x, y, Powerup.WIDTH, Powerup.HEIGHT)
+    rect = pygame.Rect(x, y, width, height)
 
-    # The ``collided`` set keeps track of balls already duplicated by this
-    # powerup
-    return {"rect": rect, "timer": Powerup.DURATION, "collided": set()}
+    return {"rect": rect, "timer": duration, "collided": set(), "type": p_type}

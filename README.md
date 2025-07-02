@@ -8,6 +8,8 @@ Single Player Pong is a vertical-scrolling twist on the classic arcade game. Bui
 
 - Balls speed up after bouncing off the top wall or your paddle
 - Yellow power-ups briefly appear and duplicate any ball that passes through them
+- Blue power-ups enlarge your paddle for a short time, while red ones shrink it
+- Purple power-ups slow down every ball for a few seconds, giving you time to react
 - The game ends only when every ball is missed
 
 ## Requirements
@@ -17,10 +19,10 @@ Single Player Pong is a vertical-scrolling twist on the classic arcade game. Bui
 
 ## Installation
 
-Clone the repository and install Pygame:
+Clone the repository and install the dependencies:
 
 ```bash
-pip install pygame
+pip install pygame numpy
 ```
 
 ## Running the Game

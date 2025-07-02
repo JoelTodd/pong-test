@@ -5,9 +5,10 @@ import sys
 import random
 import math
 
-from constants import Screen, Paddle, Ball, Powerup
+from constants import Screen, Paddle, Ball, Powerup, SlowPowerup
 from utils import snappy_ease, duplicate_velocity
 from entities import create_ball, spawn_powerup
+from synth import SOUNDS
 
 
 def run_game(screen, clock, font, debug_font) -> int:
@@ -26,6 +27,15 @@ def run_game(screen, clock, font, debug_font) -> int:
     balls = [create_ball()]  # list of active balls on the screen
     powerup = None           # there may or may not be a powerup present
     score = 0
+    slow_timer: float = 0.0  # duration remaining for the slow effect
+
+    paddle_power_timer = 0.0
+    paddle_power_effect: str | None = None
+
+    # Pre-render the score label so it doesn't need to be recreated
+    score_label_surf = font.render("Score:", True, "white")
+    # Track animation progress for the bouncing effect on the score number
+    score_bounce_t = 1.0
 
     paddle_vx: float = 0.0           # current horizontal velocity
     paddle_target_vx: float = 0.0    # desired velocity based on input
@@ -35,6 +45,18 @@ def run_game(screen, clock, font, debug_font) -> int:
     while True:
         # ``dt`` is the time (in seconds) since the last loop iteration
         dt = clock.tick(Screen.FPS) / 1000.0
+        if slow_timer > 0:
+            slow_timer = max(0.0, slow_timer - dt)
+        speed_factor = SlowPowerup.SPEED_FACTOR if slow_timer > 0 else 1.0
+
+        if paddle_power_timer > 0:
+            paddle_power_timer -= dt
+            if paddle_power_timer <= 0:
+                # restore paddle size
+                center = paddle.centerx
+                paddle.width = Paddle.WIDTH
+                paddle.centerx = center
+                paddle_power_effect = None
 
         # Handle window events and toggle debug mode with the M key
         for event in pygame.event.get():
@@ -73,8 +95,10 @@ def run_game(screen, clock, font, debug_font) -> int:
         paddle.clamp_ip(pygame.Rect(0, 0, Screen.WIDTH, Screen.HEIGHT))
 
         # Randomly spawn a powerup
-        if powerup is None and random.random() < Powerup.CHANCE:
+        spawn_prob = Powerup.CHANCE + SlowPowerup.CHANCE
+        if powerup is None and random.random() < spawn_prob:
             powerup = spawn_powerup()
+            SOUNDS["powerup"].play()
 
         # Update all balls
         for b in balls[:]:
@@ -82,18 +106,20 @@ def run_game(screen, clock, font, debug_font) -> int:
             prev_vx, prev_vy = b["vx"], b["vy"]
 
             # Apply gravity then update position using sub-pixel accuracy
-            b["vy"] += Ball.GRAVITY
-            b["x"] += b["vx"]
-            b["y"] += b["vy"]
+            b["vy"] += Ball.GRAVITY * speed_factor
+            b["x"] += b["vx"] * speed_factor
+            b["y"] += b["vy"] * speed_factor
             rect.x = round(b["x"])
             rect.y = round(b["y"])
 
             # Bounce off the side walls
             if rect.left <= 0 or rect.right >= Screen.WIDTH:
                 b["vx"] *= -1
+                SOUNDS["bounce"].play()
             if rect.top <= 0:
                 # Bounce off the top and gradually speed up
                 b["vy"] *= -1
+                SOUNDS["bounce"].play()
                 speed = math.hypot(b["vx"], b["vy"])
                 if speed < Ball.MAX_SPEED:
                     speed = min(speed * Ball.SPEED_INCREMENT, Ball.MAX_SPEED)
@@ -105,6 +131,7 @@ def run_game(screen, clock, font, debug_font) -> int:
             if rect.colliderect(paddle) and b["vy"] > 0:
                 offset = (rect.centerx - paddle.centerx) / (Paddle.WIDTH / 2)
                 b["vy"] *= -1
+                SOUNDS["bounce"].play()
                 b["vx"] += (
                     offset * Ball.ANGLE_INFLUENCE
                     + paddle_vx * Paddle.VEL_INFLUENCE
@@ -118,24 +145,44 @@ def run_game(screen, clock, font, debug_font) -> int:
                     -Ball.MAX_SPEED,
                 )
                 score += 1
+                # Restart the bounce animation whenever the score increases
+                score_bounce_t = 0.0
 
             # Handle collisions with the powerup bar
             if powerup:
                 p_rect = powerup["rect"]
                 ball_id = b["id"]
-                if (
-                    p_rect.colliderect(rect)
-                    and ball_id not in powerup["collided"]
-                ):
-                    # Duplicate the ball in a new random direction
-                    vx_new, vy_new = duplicate_velocity(b["vx"], b["vy"])
-                    nb = create_ball(up=b["vy"] < 0, pos=rect.center)
-                    nb["vx"], nb["vy"] = vx_new, vy_new
-                    powerup["collided"].update({ball_id, nb["id"]})
-                    balls.append(nb)
-                elif not p_rect.colliderect(rect):
-                    # Once a ball leaves, allow it to trigger again later
-                    powerup["collided"].discard(ball_id)
+                if powerup["type"] == "slow":
+                    if p_rect.colliderect(rect):
+                        slow_timer = SlowPowerup.EFFECT_TIME
+                        powerup = None
+                else:
+                    if (
+                        p_rect.colliderect(rect)
+                        and ball_id not in powerup["collided"]
+                    ):
+                        if powerup["type"] == "duplicate":
+                            vx_new, vy_new = duplicate_velocity(b["vx"], b["vy"])
+                            nb = create_ball(up=b["vy"] < 0, pos=rect.center)
+                            nb["vx"], nb["vy"] = vx_new, vy_new
+                            balls.append(nb)
+                            powerup["collided"].update({ball_id, nb["id"]})
+                            SOUNDS["powerup"].play()
+                        else:
+                            factor = (
+                                Powerup.ENLARGE_FACTOR
+                                if powerup["type"] == "paddle_big"
+                                else Powerup.SHRINK_FACTOR
+                            )
+                            center = paddle.centerx
+                            paddle.width = int(Paddle.WIDTH * factor)
+                            paddle.centerx = center
+                            paddle_power_timer = Powerup.SIZE_DURATION
+                            paddle_power_effect = powerup["type"]
+                            powerup["collided"].add(ball_id)
+                    elif not p_rect.colliderect(rect):
+                        # Once a ball leaves, allow it to trigger again later
+                        powerup["collided"].discard(ball_id)
 
             # Compute acceleration for debug display
             if dt > 0:
@@ -163,12 +210,29 @@ def run_game(screen, clock, font, debug_font) -> int:
         for b in balls:
             pygame.draw.ellipse(screen, "white", b["rect"])
         if powerup:
-            pygame.draw.rect(screen, "yellow", powerup["rect"])
+            colour = {
+                "duplicate": "yellow",
+                "paddle_big": "blue",
+                "paddle_small": "red",
+                "slow": "blue",
+            }.get(powerup["type"], "yellow")
+            pygame.draw.rect(screen, colour, powerup["rect"])
 
-        # Draw the current score in the top-right corner
-        score_surf = font.render(f"Score: {score}", True, "white")
+        # Update the bounce animation timer
+        if score_bounce_t < 1.0:
+            score_bounce_t = min(score_bounce_t + dt / 0.3, 1.0)
+            offset = -abs(math.sin(score_bounce_t * math.pi)) * 10
+        else:
+            offset = 0
+
+        # Draw the current score in the top-right corner with bouncing digits
+        score_num_surf = font.render(str(score), True, "white")
+        total_w = score_label_surf.get_width() + score_num_surf.get_width() + 5
+        x = Screen.WIDTH - total_w - 10
+        screen.blit(score_label_surf, (x, 10))
         screen.blit(
-            score_surf, (Screen.WIDTH - score_surf.get_width() - 10, 10)
+            score_num_surf,
+            (x + score_label_surf.get_width() + 5, 10 + offset),
         )
 
         if debug_mode:
