@@ -13,6 +13,13 @@ def _enveloped_sine(freq: float, duration: float, volume: float) -> pygame.mixer
     envelope = np.exp(-6 * t)
     wave = wave * envelope * volume
     audio = (wave * 32767).astype(np.int16)
+
+    init = pygame.mixer.get_init()
+    channels = init[2] if init else 1
+    if channels > 1 and audio.ndim == 1:
+        # Duplicate the mono signal for stereo mixers
+        audio = np.repeat(audio[:, None], channels, axis=1)
+
     return pygame.sndarray.make_sound(audio)
 
 
