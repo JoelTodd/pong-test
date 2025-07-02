@@ -1,4 +1,8 @@
-"""Core gameplay loop for the Pong clone."""
+"""Core gameplay loop for the single-player Pong clone.
+
+All rendering and physics updates occur here.  The :func:`run_game` function
+is called once per round and returns the score when no balls remain.
+"""
 
 import pygame
 import sys
@@ -22,7 +26,19 @@ from synth import SOUNDS
 
 
 def run_game(screen, clock, font, debug_font) -> int:
-    """Run one session of Pong and return the player's score."""
+    """Run a single game session and return the player's score.
+
+    Parameters
+    ----------
+    screen:
+        The main display surface.
+    clock:
+        Pygame clock used to regulate the frame rate.
+    font:
+        Font object for UI rendering.
+    debug_font:
+        Font used when debug mode is enabled.
+    """
 
     debug_mode = False
 

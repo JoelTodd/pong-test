@@ -1,10 +1,15 @@
-"""Collection of gameplay constants split into logical categories."""
+"""Constants used throughout the game.
+
+The values are organised into small classes to keep related settings
+together.  This module contains screen dimensions, paddle movement
+parameters, ball physics and power-up configuration.
+"""
 
 from enum import Enum
 
 
 class Screen:
-    """Window dimensions and framerate."""
+    """Dimensions of the window and desired frame rate."""
 
     WIDTH = 512
     HEIGHT = 640
@@ -12,7 +17,7 @@ class Screen:
 
 
 class Paddle:
-    """Paddle dimensions and movement settings."""
+    """Paddle size and movement tuning constants."""
 
     WIDTH = 80
     HEIGHT = 6
@@ -22,7 +27,7 @@ class Paddle:
 
 
 class Ball:
-    """Ball size and physics related constants."""
+    """Physical parameters controlling ball behaviour."""
 
     SIZE = 10
     SPEED_X_RANGE = (-3, 3)
@@ -34,7 +39,7 @@ class Ball:
 
 
 class PowerupType(str, Enum):
-    """Identifier strings for power-up behaviours."""
+    """String values identifying the different power-up effects."""
 
     DUPLICATE = "duplicate"
     PADDLE_BIG = "paddle_big"
@@ -51,7 +56,7 @@ POWERUP_COLOURS = {
 
 
 class BasePowerup:
-    """Base values shared across power-ups."""
+    """Common dimensions and timing shared by power-ups."""
 
     WIDTH = 100
     HEIGHT = 4
@@ -59,13 +64,13 @@ class BasePowerup:
 
 
 class DuplicatePowerup(BasePowerup):
-    """Ball-duplicating power-up settings."""
+    """Parameters for the ball duplication power-up."""
 
     CHANCE = 0.005
 
 
 class PaddleBigPowerup(BasePowerup):
-    """Temporarily enlarge the paddle."""
+    """Settings for the paddle-enlarging power-up."""
 
     CHANCE = 0.005
     SIZE_DURATION = 6.0
@@ -73,7 +78,7 @@ class PaddleBigPowerup(BasePowerup):
 
 
 class PaddleSmallPowerup(BasePowerup):
-    """Temporarily shrink the paddle."""
+    """Settings for the paddle-shrinking power-up."""
 
     CHANCE = 0.005
     SIZE_DURATION = 6.0
@@ -81,7 +86,7 @@ class PaddleSmallPowerup(BasePowerup):
 
 
 class SlowPowerup:
-    """Power-up that temporarily slows all balls."""
+    """Configuration for the temporary slow-motion power-up."""
 
     WIDTH = 100
     HEIGHT = 4

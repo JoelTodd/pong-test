@@ -8,7 +8,15 @@ from synth import SOUNDS
 
 
 def run_menu(screen, clock) -> None:
-    """Display the main menu until the user chooses to start or quit."""
+    """Display the main menu until the user chooses to start or quit.
+
+    Parameters
+    ----------
+    screen:
+        Display surface used for rendering.
+    clock:
+        Clock for controlling the frame rate.
+    """
 
     options = ["Start Game", "Quit"]
     selected = 0
@@ -72,7 +80,22 @@ def run_menu(screen, clock) -> None:
 
 
 def run_game_over(screen, clock, score: int) -> str:
-    """Display the game over screen and return the player's choice."""
+    """Display the game-over screen and return the player's choice.
+
+    Parameters
+    ----------
+    screen:
+        The display surface to draw on.
+    clock:
+        Clock for timing the menu loop.
+    score:
+        The score achieved in the preceding game.
+
+    Returns
+    -------
+    str
+        ``"retry"`` or ``"menu"`` depending on the player's selection.
+    """
 
     options = ["Retry", "Main Menu"]
     selected = 0
