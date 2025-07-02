@@ -24,17 +24,17 @@ def create_ball(up: bool = False, pos: tuple[int, int] | None = None) -> dict:
     """
     global _next_ball_id
 
-    # Create the rectangular hitbox for the ball
+    # Create the rectangular hitbox for the ball.
     rect = pygame.Rect(0, 0, Ball.SIZE, Ball.SIZE)
     rect.center = pos or (
         random.randint(40, Screen.WIDTH - 40),
         Screen.HEIGHT // 2,
     )
 
-    # Pick a starting velocity for the ball
+    # Pick a starting velocity for the ball.
     vx, vy = random_velocity(up)
 
-    # Store additional fields used for debugging/physics
+    # Store additional fields used for debugging and physics.
     ball = {
         "rect": rect,
         "x": float(rect.x),
@@ -91,7 +91,7 @@ def spawn_powerup() -> dict:
             PaddleSmallPowerup.DURATION,
         )
 
-    # Position the powerup somewhere near the top half of the screen
+    # Position the powerup somewhere near the top half of the screen.
     x = random.randint(20, Screen.WIDTH - width - 20)
     y = random.randint(80, Screen.HEIGHT // 2)
     rect = pygame.Rect(x, y, width, height)

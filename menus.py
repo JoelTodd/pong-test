@@ -28,11 +28,11 @@ def run_menu(screen, clock) -> None:
                 sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key in (pygame.K_UP, pygame.K_w):
-                    # Move selection up
+                    # Move selection up.
                     selected = (selected - 1) % len(options)
                     SOUNDS["menu_move"].play()
                 elif event.key in (pygame.K_DOWN, pygame.K_s):
-                    # Move selection down
+                    # Move selection down.
                     selected = (selected + 1) % len(options)
                     SOUNDS["menu_move"].play()
                 elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
@@ -87,11 +87,11 @@ def run_game_over(screen, clock, score: int) -> str:
                 sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key in (pygame.K_UP, pygame.K_w):
-                    # Move selection up
+                    # Move selection up.
                     selected = (selected - 1) % len(options)
                     SOUNDS["menu_move"].play()
                 elif event.key in (pygame.K_DOWN, pygame.K_s):
-                    # Move selection down
+                    # Move selection down.
                     selected = (selected + 1) % len(options)
                     SOUNDS["menu_move"].play()
                 elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):

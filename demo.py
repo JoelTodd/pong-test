@@ -34,7 +34,7 @@ class DemoGame:
         )
         self._paddle_center = float(self.paddle.centerx)
         self.paddle_vx: float = 0.0
-        self.balls = [create_ball()]  # start with a single ball
+        self.balls = [create_ball()]  # Start with a single ball.
         self.powerup: dict | None = None
         self.paddle_power_timer = 0.0
         self.slow_timer: float = 0.0
@@ -53,8 +53,8 @@ class DemoGame:
             self.slow_timer = max(0.0, self.slow_timer - dt)
         speed_factor = SlowPowerup.SPEED_FACTOR if self.slow_timer > 0 else 1.0
 
-        # Autopilot: track whichever ball will hit the paddle next. A small
-        # random offset keeps the motion from looking too mechanical.
+        # Autopilot: track the ball that will strike the paddle next.
+        # A small random offset keeps the motion from looking too mechanical.
         if self.balls:
             target_x: float | None = None
             frames_left: int | None = None
@@ -63,14 +63,14 @@ class DemoGame:
                 if frames_left is None or fl < frames_left:
                     target_x, frames_left = tx, fl
             assert target_x is not None and frames_left is not None
-            # Add a tiny offset each frame to avoid perfectly straight movement
+            # Add a tiny offset each frame so the paddle motion is not perfectly straight.
             assert target_x is not None
             target_x += random.uniform(-2, 2)
 
-            # Determine when we need to start moving so we reach the target
+            # Determine when to start moving so the paddle reaches the target.
             dist = abs(target_x - self._paddle_center)
             move_frames = math.ceil(dist / Paddle.SPEED)
-            # Aim to arrive a handful of frames before impact
+            # Aim to arrive a few frames before impact.
             assert frames_left is not None
             start_moving = frames_left <= move_frames + 3
 
@@ -90,7 +90,7 @@ class DemoGame:
                 pygame.Rect(0, 0, Screen.WIDTH, Screen.HEIGHT)
             )
 
-        # Occasionally spawn a powerup
+        # Occasionally spawn a powerup.
         spawn_prob = (
             DuplicatePowerup.CHANCE
             + PaddleBigPowerup.CHANCE
@@ -118,7 +118,7 @@ class DemoGame:
                     b["vx"] = int(round(math.cos(angle) * speed))
                     b["vy"] = int(round(math.sin(angle) * speed))
 
-            # Bounce off the paddle
+            # Bounce off the paddle.
             if rect.colliderect(self.paddle) and b["vy"] > 0:
                 offset = (
                     rect.centerx - self.paddle.centerx
@@ -137,7 +137,7 @@ class DemoGame:
                     -Ball.MAX_SPEED,
                 )
 
-            # Handle powerup
+            # Handle powerup collisions.
             if self.powerup:
                 p_rect = self.powerup["rect"]
                 ball_id = b["id"]
@@ -179,6 +179,7 @@ class DemoGame:
                 self.powerup = None
 
         if not self.balls:
+            # Always keep at least one ball in play.
             self.balls.append(create_ball())
 
     def draw(self, surface: pygame.Surface) -> None:

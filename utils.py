@@ -24,11 +24,11 @@ def snappy_ease(t: float) -> float:
 def random_velocity(up: bool = False) -> tuple[float, float]:
     """Return a random starting velocity for a ball."""
 
-    # Choose a horizontal component first. "range" is inclusive/exclusive
+    # Choose a horizontal component first. The ``range`` is inclusive/exclusive
     # so we convert it to a list before picking a value.
     vx = float(random.choice(list(range(*Ball.SPEED_X_RANGE))))
 
-    # Vertical speed is always positive; we flip it if the ball should move up.
+    # Vertical speed is always positive; flip it if the ball should move up.
     vy = float(random.choice(range(*Ball.SPEED_Y_RANGE)))
     if up:
         vy *= -1
